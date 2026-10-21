@@ -1,0 +1,30 @@
+name: Fetch CelesTrak Google Sheet Cache
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+jobs:
+  fetch-celestrak:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas gspread google-auth
+
+      - name: Run CelesTrak relay
+        env:
+          ODR_JSON: ${{ secrets.ODR_JSON }}
+          GOOGLE_SHEET_ID: 1isa_rOueh0yDY9OM43Q2AWZoKPGrlvEo7JOSHJdW3jE
+        run: python SSA_tools/celestrak_relay.py

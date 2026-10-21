@@ -1,0 +1,30 @@
+# .streamlit/config.toml
+
+[theme]
+# Default theme when the app starts ("light" or "dark")
+base = "light"
+
+# ========================
+# LIGHT THEME
+# ========================
+[theme.light]
+primaryColor = "#1a4fa3"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#0e224b"
+
+[theme.light.sidebar]
+backgroundColor = "#f8f9fa"
+
+# ========================
+# DARK THEME
+# ========================
+[theme.dark]
+primaryColor = "#1a4fa3"          # Nice bright cyan/blue for space/tech feel
+backgroundColor = "#0a0f1c"       # Very dark navy (pairs well with your header)
+secondaryBackgroundColor = "#1e2a44"
+textColor = "#e0e0e0"
+
+[theme.dark.sidebar]
+backgroundColor = "#13213d"
+
