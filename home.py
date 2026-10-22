@@ -60,12 +60,12 @@ ssa_rocket = st.Page(
     url_path="rocket"
 )
 
-ssa_collision = st.Page(
-    "SSA_tools/collision.py",
-    title="Conjunction",
-    icon=":material/compare_arrows:",
-    url_path="collision"
-)
+# ssa_collision = st.Page(
+#     "SSA_tools/collision.py",
+#     title="Conjunction",
+#     icon=":material/compare_arrows:",
+#     url_path="collision"
+# )
 
 ssa_reenter = st.Page(
     "SSA_tools/reenter.py",
@@ -99,7 +99,8 @@ faqs = st.Page(
 pg = st.navigation(
     {
         "Home": [about, dashboard],
-        "SSA Tools": [ssa_collision, ssa_reenter, ssa_rocket, ssa_weather],
+        #"SSA Tools": [ssa_collision, ssa_reenter, ssa_rocket, ssa_weather],
+        "SSA Tools": [ssa_reenter, ssa_rocket, ssa_weather],
         "Resources": [document, faqs]
     },
     position="top"
@@ -209,7 +210,7 @@ pg = st.navigation(
 # ====================== UNIFIED HEADER (Clock + Page Title) ======================
 PAGE_META = {
     "Dashboard": {
-        "title"   : "Welcome to the Space Situational Awareness Application (SSA App)",
+        "title"   : "Welcome to the Space Situational Awareness (SSA) Dashboard",
         "subtitle": "Compiled and operated by the Space Mission Control and Operations Division (SMCOD) of Philippine Space Agency (PhilSA)",
     },
 }
