@@ -980,6 +980,140 @@ def create_folium_map(launch_site_value, dropzones, shape_dir):
     m.get_root().html.add_child(folium.Element(legend))
     return m
 
+# def create_historical_map(df, shape_dir):
+#     loaded = load_mapping_data(shape_dir)
+    
+#     m = folium.Map(location=[14.5, 120.5], zoom_start=5)
+
+#     # ====================== LAUNCH SITES ======================
+#     for site_name, (lat, lon) in loaded["launch_sites"].items():
+#         folium.Marker(
+#             [lat, lon],
+#             popup=f"Launch Site: {site_name}",
+#             icon=folium.Icon(color="green", icon="rocket", prefix="fa")
+#         ).add_to(m)
+
+#     # ====================== DROPZONES - CONSISTENT GREEN STYLE ======================
+#     for idx, row in df.iterrows():
+#         for dz_num in range(1, 5):
+#             dz = f"DZ{dz_num}"
+            
+#             verts = [
+#                 str(row.get(f"{dz} P{p}", "")).strip()
+#                 for p in range(1, 9)
+#                 if str(row.get(f"{dz} P{p}", "")).strip()
+#             ]
+            
+#             pts = [parse_coordinates(v) for v in verts]
+#             pts = [(lat, lon) for lat, lon in pts if lat is not None]
+
+#             if len(pts) >= 3:
+#                 folium.Polygon(
+#                     pts,
+#                     popup=f"{row.get('ROCKET NAME','')} | {dz}",
+#                     color="#006400",           # Dark Green outline
+#                     weight=2.5,                # Slightly thicker outline
+#                     fill=True,
+#                     fill_color="#32CD32",      # Lime Green fill
+#                     fill_opacity=0.25,         # Semi-transparent
+#                     opacity=0.9                # Outline opacity
+#                 ).add_to(m)
+
+#             # Debris points (unchanged)
+#             debs = [
+#                 str(row.get(f"DEB{dz_num} P{p}", "")).strip()
+#                 for p in range(1, 5)
+#                 if str(row.get(f"DEB{dz_num} P{p}", "")).strip()
+#             ]
+            
+#             dpts = [parse_coordinates(d) for d in debs]
+#             dpts = [(lat, lon) for lat, lon in dpts if lat is not None]
+
+#             for lat, lon in dpts:
+#                 folium.CircleMarker(
+#                     [lat, lon],
+#                     radius=3,
+#                     color="black",
+#                     fill=True,
+#                     fill_opacity=0.7,
+#                     popup=f"{row.get('ROCKET NAME','')} debris"
+#                 ).add_to(m)
+
+#     # ====================== OVERLAYS ======================
+#     for path, color, weight, fill in [
+#         (loaded["manila_fir"], "orange", 1.5, False),
+#         (loaded["baseline"], "gold", 1.5, False),
+#         (loaded["eez"], "blue", 1.5, True)
+#     ]:
+#         if not os.path.exists(path):
+#             continue
+#         try:
+#             gdf = gpd.read_file(path)
+#             for geom in gdf.geometry:
+#                 if not geom:
+#                     continue
+#                 polys = [geom] if geom.geom_type == "Polygon" else list(geom.geoms) if hasattr(geom, "geoms") else []
+#                 for poly in polys:
+#                     x, y = poly.exterior.xy
+#                     if fill:
+#                         folium.Polygon(list(zip(y, x)), color=color, weight=weight, fill=True, fill_opacity=0.05).add_to(m)
+#                     else:
+#                         folium.PolyLine(list(zip(y, x)), color=color, weight=weight).add_to(m)
+#         except:
+#             pass
+
+#     # ====================== LEGEND (Updated) ======================
+#     legend = """
+#     <div id='maplegend' class='maplegend' 
+#          style='position: fixed; z-index: 9999; 
+#                 background-color: rgba(255, 255, 255, 0.85); 
+#                 border-radius: 8px; 
+#                 padding: 12px 15px; 
+#                 font-size: 14px;
+#                 bottom: 30px; left: 30px;
+#                 border: 2px solid rgba(0,0,0,0.4);
+#                 box-shadow: 0 4px 12px rgba(0,0,0,0.25);'>
+        
+#         <div style="color: #000000; font-weight: bold; margin-bottom: 10px; font-size: 15px;">Legend</div>
+        
+#         <div class='legend-scale'>
+#             <ul class='legend-labels' style="list-style: none; padding: 0; margin: 0;">
+#                 <li style="color: #000000; margin-bottom: 8px;">
+#                     <i class="fa fa-rocket fa-2x" style="color:#006400; margin-right: 8px;"></i> Launch Site</li>
+#                 <li style="color: #000000; margin-bottom: 8px;">
+#                     <i class="fa fa-trash fa-2x" style="color:#333; margin-right: 8px;"></i> Debris Point</li>
+#                 <li style="color: #000000; margin-bottom: 8px;">
+#                     <span style="display:inline-block; width:30px; border-bottom: 2.5px dashed #333; margin-right: 8px; vertical-align: middle;"></span> Rocket Ground Track</li>
+#                 <li style="color: #000000; margin-bottom: 8px;">
+#                     <span style='background:#006400; width:18px; height:18px; display:inline-block; margin-right:8px;'></span> Drop Zone</li>
+#                 <li style="color: #000000; margin-bottom: 8px;">
+#                     <span style='background:#FFA500; width:18px; height:18px; display:inline-block; margin-right:8px;'></span> Manila FIR</li>
+#                 <li style="color: #000000; margin-bottom: 8px;">
+#                     <span style='background:#FFD700; width:18px; height:18px; display:inline-block; margin-right:8px;'></span> PH Baseline</li>
+#                 <li style="color: #000000; margin-bottom: 8px;">
+#                     <span style='background:#0000CD; width:18px; height:18px; display:inline-block; margin-right:8px;'></span> PH EEZ</li>
+#             </ul>
+#         </div>
+#     </div>
+
+#     <style type='text/css'>
+#         .maplegend .legend-scale ul { margin: 0; padding: 0; }
+#         .maplegend .legend-scale ul li { 
+#             list-style: none; 
+#             line-height: 22px; 
+#             margin-bottom: 6px; 
+#             font-size: 14px;
+#         }
+#         .maplegend ul.legend-labels li span { 
+#             float: left; 
+#             margin-right: 8px; 
+#         }
+#     </style>
+#     """
+#     m.get_root().html.add_child(folium.Element(legend))
+
+#     return m
+
 def create_historical_map(df, shape_dir):
     loaded = load_mapping_data(shape_dir)
     
@@ -993,7 +1127,7 @@ def create_historical_map(df, shape_dir):
             icon=folium.Icon(color="green", icon="rocket", prefix="fa")
         ).add_to(m)
 
-    # ====================== DROPZONES - CONSISTENT GREEN STYLE ======================
+    # ====================== DROPZONES ======================
     for idx, row in df.iterrows():
         for dz_num in range(1, 5):
             dz = f"DZ{dz_num}"
@@ -1011,15 +1145,15 @@ def create_historical_map(df, shape_dir):
                 folium.Polygon(
                     pts,
                     popup=f"{row.get('ROCKET NAME','')} | {dz}",
-                    color="#006400",           # Dark Green outline
-                    weight=2.5,                # Slightly thicker outline
+                    color="#006400",
+                    weight=2.5,
                     fill=True,
-                    fill_color="#32CD32",      # Lime Green fill
-                    fill_opacity=0.25,         # Semi-transparent
-                    opacity=0.9                # Outline opacity
+                    fill_color="#32CD32",
+                    fill_opacity=0.25,
+                    opacity=0.9
                 ).add_to(m)
 
-            # Debris points (unchanged)
+            # Debris points from launches
             debs = [
                 str(row.get(f"DEB{dz_num} P{p}", "")).strip()
                 for p in range(1, 5)
@@ -1038,6 +1172,26 @@ def create_historical_map(df, shape_dir):
                     fill_opacity=0.7,
                     popup=f"{row.get('ROCKET NAME','')} debris"
                 ).add_to(m)
+
+    # ====================== DEBRIS RETRIEVAL LOCATIONS (NEW) ======================
+    debris_csv = os.path.join(shape_dir, "debris.csv")
+    if os.path.exists(debris_csv):
+        try:
+            debris_df = pd.read_csv(debris_csv)
+            for _, row in debris_df.iterrows():
+                lat = float(row["Lat"])
+                lon = float(row["Lon"])
+                place = str(row.get("Place", "")).strip()
+                location = str(row.get("Location", "")).strip()
+
+                folium.Marker(
+                    [lat, lon],
+                    popup=f"<b>Debris Retrieved</b><br>{place}<br>{location}",
+                    tooltip=place,
+                    icon=folium.Icon(color="purple", icon="recycle", prefix="fa")
+                ).add_to(m)
+        except Exception as e:
+            st.warning(f"Could not load Debris Retrieval Locations: {e}")
 
     # ====================== OVERLAYS ======================
     for path, color, weight, fill in [
@@ -1062,7 +1216,7 @@ def create_historical_map(df, shape_dir):
         except:
             pass
 
-    # ====================== LEGEND (Updated) ======================
+    # ====================== LEGEND ======================
     legend = """
     <div id='maplegend' class='maplegend' 
          style='position: fixed; z-index: 9999; 
@@ -1083,7 +1237,7 @@ def create_historical_map(df, shape_dir):
                 <li style="color: #000000; margin-bottom: 8px;">
                     <i class="fa fa-trash fa-2x" style="color:#333; margin-right: 8px;"></i> Debris Point</li>
                 <li style="color: #000000; margin-bottom: 8px;">
-                    <span style="display:inline-block; width:30px; border-bottom: 2.5px dashed #333; margin-right: 8px; vertical-align: middle;"></span> Rocket Ground Track</li>
+                    <i class="fa fa-recycle fa-2x" style="color:purple; margin-right: 8px;"></i> Debris Retrieved</li>
                 <li style="color: #000000; margin-bottom: 8px;">
                     <span style='background:#006400; width:18px; height:18px; display:inline-block; margin-right:8px;'></span> Drop Zone</li>
                 <li style="color: #000000; margin-bottom: 8px;">
@@ -1217,53 +1371,53 @@ if st.session_state.selected == "Launch Dashboard":
         st.divider()
 
  
-    # # ==================== MAIN LAYOUT: Wide Left + Tall Right ===================
-    # left_col, right_col = st.columns([2.8, 1.0])
-    #     # ================== FILTERS ==================
-    #     # Country Filter using LAUNCHING STATE
-    # if "LAUNCHING STATE" in df.columns:
-    #     country_options = sorted(df["LAUNCHING STATE"].dropna().unique())
-    #     selected_countries = st.multiselect(
-    #         "Filter by Launching State:",
-    #         options=country_options,
-    #         default=country_options,   # Select all by default
-    #         placeholder="Select states/countries..."
-    #     )
-    # else:
-    #     selected_countries = None
-    #     st.warning("Launching State column not found. Showing all data.")
+    # ==================== MAIN LAYOUT: Wide Left + Tall Right ===================
+    left_col, right_col = st.columns([2.8, 1.0])
+        # ================== FILTERS ==================
+        # Country Filter using LAUNCHING STATE
+    if "LAUNCHING STATE" in df.columns:
+        country_options = sorted(df["LAUNCHING STATE"].dropna().unique())
+        selected_countries = st.multiselect(
+            "Filter by Launching State:",
+            options=country_options,
+            default=country_options,   # Select all by default
+            placeholder="Select states/countries..."
+        )
+    else:
+        selected_countries = None
+        st.warning("Launching State column not found. Showing all data.")
     
     #pseudo code for new country filter with pseudo names
     left_col, right_col = st.columns([2.8, 1.0])
     
-    # ================== FILTERS ==================
-    # Country Filter using LAUNCHING STATE (with Pseudo Names)
-    if "LAUNCHING STATE" in df.columns:
-        country_options = sorted(df["LAUNCHING STATE"].dropna().unique())
+    # # ================== FILTERS ==================
+    # # Country Filter using LAUNCHING STATE (with Pseudo Names)
+    # if "LAUNCHING STATE" in df.columns:
+    #     country_options = sorted(df["LAUNCHING STATE"].dropna().unique())
         
-        # Create mapping from real country to pseudo name
-        country_mapping = {country: f"Country {chr(65 + i)}" 
-                          for i, country in enumerate(country_options)}
+    #     # Create mapping from real country to pseudo name
+    #     country_mapping = {country: f"Country {chr(65 + i)}" 
+    #                       for i, country in enumerate(country_options)}
         
-        # Create reverse mapping for filtering later
-        st.session_state.country_reverse_mapping = {v: k for k, v in country_mapping.items()}
+    #     # Create reverse mapping for filtering later
+    #     st.session_state.country_reverse_mapping = {v: k for k, v in country_mapping.items()}
         
-        # Display pseudo names in the multiselect
-        pseudo_options = list(country_mapping.values())
+    #     # Display pseudo names in the multiselect
+    #     pseudo_options = list(country_mapping.values())
         
-        selected_pseudo = st.multiselect(
-            "Filter by Launching State:",
-            options=pseudo_options,
-            default=pseudo_options,  # Select all by default
-            placeholder="Select states/countries..."
-        )
+    #     selected_pseudo = st.multiselect(
+    #         "Filter by Launching State:",
+    #         options=pseudo_options,
+    #         default=pseudo_options,  # Select all by default
+    #         placeholder="Select states/countries..."
+    #     )
         
-        # Convert pseudo back to real country names for filtering
-        selected_countries = [st.session_state.country_reverse_mapping[p] for p in selected_pseudo]
+    #     # Convert pseudo back to real country names for filtering
+    #     selected_countries = [st.session_state.country_reverse_mapping[p] for p in selected_pseudo]
         
-    else:
-        selected_countries = None
-        st.warning("Launching State column not found. Showing all data.")
+    # else:
+    #     selected_countries = None
+    #     st.warning("Launching State column not found. Showing all data.")
     # ==================== LEFT COLUMN ====================
     with left_col:
         # ==================== TOP ROW - Two Charts Side by Side ====================
@@ -1368,92 +1522,92 @@ if st.session_state.selected == "Launch Dashboard":
                     st.caption(f"**Total Drop Zone**: {total_dzs:,} across all selected periods")
 
         # ==================== COLUMN 2: Launches by Country ====================
-        # with col2:
-        #     st.subheader("Launches by Country")
-        #     container2 = st.container(border=True, height=600)   # ← Same height as left
-        #     with container2:
-        #         st.markdown("**Overall Distribution**")
-        #         st.space()
-               
-        #         df_graph = df.copy()
-               
-        #         # No country filter - full picture
-        #         if "LAUNCHING STATE" in df_graph.columns and not df_graph.empty:
-        #             country_counts = df_graph["LAUNCHING STATE"].value_counts().reset_index()
-        #             country_counts.columns = ["Country", "Count"]
-                   
-        #             fig_pie = px.pie(
-        #                 country_counts,
-        #                 names="Country",
-        #                 values="Count",
-        #                 hole=0.45,
-        #                 color_discrete_sequence=px.colors.qualitative.Set2,
-        #                 template="simple_white",
-        #                 height=420                     # ← Adjusted to fit container
-        #             )
-        #             fig_pie.update_traces(
-        #                 textinfo="percent+label",
-        #                 marker=dict(line=dict(color="white", width=2)),
-        #                 textfont_size=14
-        #             )
-        #             fig_pie.update_layout(
-        #                 margin=dict(t=30, b=30)
-        #             )
-        #             st.plotly_chart(fig_pie, use_container_width=True)
-        #         else:
-        #             st.info("No country data available.")
-        
-        #pseudo code for new Launches by Country chart with anonymization
         with col2:
             st.subheader("Launches by Country")
-            container2 = st.container(border=True, height=600)
+            container2 = st.container(border=True, height=600)   # ← Same height as left
             with container2:
                 st.markdown("**Overall Distribution**")
                 st.space()
-              
+               
                 df_graph = df.copy()
-              
+               
+                # No country filter - full picture
                 if "LAUNCHING STATE" in df_graph.columns and not df_graph.empty:
-                    # === ANONYMIZE COUNTRIES ===
                     country_counts = df_graph["LAUNCHING STATE"].value_counts().reset_index()
                     country_counts.columns = ["Country", "Count"]
-                    
-                    # Create pseudo names: Country A, Country B, Country C...
-                    country_counts = country_counts.sort_values("Count", ascending=False).reset_index(drop=True)
-                    country_counts["Pseudo_Country"] = [f"Country {chr(65 + i)}" for i in range(len(country_counts))]
-                    
-                    # For hover/legend, we can keep original if needed, but display pseudo
+                   
                     fig_pie = px.pie(
                         country_counts,
-                        names="Pseudo_Country",
+                        names="Country",
                         values="Count",
                         hole=0.45,
                         color_discrete_sequence=px.colors.qualitative.Set2,
                         template="simple_white",
-                        height=420,
-                        title="Launches by Country"
+                        height=420                     # ← Adjusted to fit container
                     )
-                    
                     fig_pie.update_traces(
                         textinfo="percent+label",
                         marker=dict(line=dict(color="white", width=2)),
                         textfont_size=14
                     )
-                    
                     fig_pie.update_layout(
-                        margin=dict(t=40, b=30),
-                        showlegend=True
+                        margin=dict(t=30, b=30)
                     )
-                    
                     st.plotly_chart(fig_pie, use_container_width=True)
-                    
-                    # Optional: Show mapping table below the chart (for your reference)
-                    # with st.expander("View Country Mapping (Original → Pseudo)"):
-                    #     mapping_df = country_counts[["Pseudo_Country", "Country"]].rename(columns={"Country": "Original Country"})
-                    #     st.dataframe(mapping_df, hide_index=True, use_container_width=True)
-                        
                 else:
                     st.info("No country data available.")
+        
+        # #pseudo code for new Launches by Country chart with anonymization
+        # with col2:
+        #     st.subheader("Launches by Country")
+        #     container2 = st.container(border=True, height=600)
+        #     with container2:
+        #         st.markdown("**Overall Distribution**")
+        #         st.space()
+              
+        #         df_graph = df.copy()
+              
+        #         if "LAUNCHING STATE" in df_graph.columns and not df_graph.empty:
+        #             # === ANONYMIZE COUNTRIES ===
+        #             country_counts = df_graph["LAUNCHING STATE"].value_counts().reset_index()
+        #             country_counts.columns = ["Country", "Count"]
+                    
+        #             # Create pseudo names: Country A, Country B, Country C...
+        #             country_counts = country_counts.sort_values("Count", ascending=False).reset_index(drop=True)
+        #             country_counts["Pseudo_Country"] = [f"Country {chr(65 + i)}" for i in range(len(country_counts))]
+                    
+        #             # For hover/legend, we can keep original if needed, but display pseudo
+        #             fig_pie = px.pie(
+        #                 country_counts,
+        #                 names="Pseudo_Country",
+        #                 values="Count",
+        #                 hole=0.45,
+        #                 color_discrete_sequence=px.colors.qualitative.Set2,
+        #                 template="simple_white",
+        #                 height=420,
+        #                 title="Launches by Country"
+        #             )
+                    
+        #             fig_pie.update_traces(
+        #                 textinfo="percent+label",
+        #                 marker=dict(line=dict(color="white", width=2)),
+        #                 textfont_size=14
+        #             )
+                    
+        #             fig_pie.update_layout(
+        #                 margin=dict(t=40, b=30),
+        #                 showlegend=True
+        #             )
+                    
+        #             st.plotly_chart(fig_pie, use_container_width=True)
+                    
+        #             # Optional: Show mapping table below the chart (for your reference)
+        #             # with st.expander("View Country Mapping (Original → Pseudo)"):
+        #             #     mapping_df = country_counts[["Pseudo_Country", "Country"]].rename(columns={"Country": "Original Country"})
+        #             #     st.dataframe(mapping_df, hide_index=True, use_container_width=True)
+                        
+        #         else:
+        #             st.info("No country data available.")
 
         # ==================== MONTHLY LAUNCH TREND (Below the two charts) ====================
         st.subheader("Launch Trend")
@@ -1538,88 +1692,88 @@ if st.session_state.selected == "Launch Dashboard":
                 st.info("No launch date data available for trend analysis.")
 
     # ==================== RIGHT COLUMN - Extended Launches ====================
-    # with right_col:
-    #     st.subheader("Launches")
-    #     container_activities = st.container(border=True, height=1100)  # Adjust this height if needed
-        
-    #     with container_activities:
-    #         events_df = df.copy()
-    #         if "LAUNCH_DATE_PARSED" in events_df.columns:
-    #             events_df = events_df.sort_values("LAUNCH_DATE_PARSED", ascending=False)
-            
-    #         # Increased number of visible launches
-    #         for _, row in events_df.head(14).iterrows():
-    #             date_str = row.get("LAUNCH DATE", "—")
-    #             rocket = row.get("ROCKET NAME", "Unknown")
-    #             site = row.get("LAUNCH CENTER", "—")
-    #             country = row.get("LAUNCHING STATE", "—")
-                
-    #             st.markdown(f"""
-    #             <div style="background-color: #1a4fa3; padding: 12px; border-radius: 10px;
-    #                         margin-bottom: 10px; color: white; font-size: 0.95rem;">
-    #                 <strong>{rocket}</strong><br>
-    #                 <small>{date_str} • {site}</small><br>
-    #                 <small>{country}</small>
-    #             </div>
-    #             """, unsafe_allow_html=True)
-            
-    #         if len(events_df) > 14:
-    #             st.caption(f"... and {len(events_df)-14} more")
-
-    #pseudo code for new right column with anonymization
-        # ==================== RIGHT COLUMN - Extended Launches ====================
     with right_col:
         st.subheader("Launches")
-        container_activities = st.container(border=True, height=1100)
-       
+        container_activities = st.container(border=True, height=1100)  # Adjust this height if needed
+        
         with container_activities:
             events_df = df.copy()
-            
             if "LAUNCH_DATE_PARSED" in events_df.columns:
                 events_df = events_df.sort_values("LAUNCH_DATE_PARSED", ascending=False)
             
-            # ==================== PSEUDO ANONYMIZATION ====================
-            if not events_df.empty:
-                # Country Pseudo
-                if "LAUNCHING STATE" in events_df.columns:
-                    unique_countries = sorted(events_df["LAUNCHING STATE"].dropna().unique())
-                    country_mapping = {c: f"Country {chr(65 + i)}" for i, c in enumerate(unique_countries)}
-                    events_df["Pseudo_Country"] = events_df["LAUNCHING STATE"].map(country_mapping)
-                
-                # Rocket Name Pseudo
-                if "ROCKET NAME" in events_df.columns:
-                    unique_rockets = sorted(events_df["ROCKET NAME"].dropna().unique())
-                    rocket_mapping = {r: f"Rocket {chr(65 + i)}" for i, r in enumerate(unique_rockets)}
-                    events_df["Pseudo_Rocket"] = events_df["ROCKET NAME"].map(rocket_mapping)
-                
-                # Launch Center Pseudo
-                if "LAUNCH CENTER" in events_df.columns:
-                    unique_sites = sorted(events_df["LAUNCH CENTER"].dropna().unique())
-                    site_mapping = {s: f"Site {chr(65 + i)}" for i, s in enumerate(unique_sites)}
-                    events_df["Pseudo_Site"] = events_df["LAUNCH CENTER"].map(site_mapping)
-                
-                # Launch Date Pseudo (e.g., Launch #001, Launch #002, ...)
-                events_df = events_df.reset_index(drop=True)
-                events_df["Pseudo_Date"] = [f"Launch #{str(i+1).zfill(3)}" for i in range(len(events_df))]
-            
-            # ==================== DISPLAY ====================
+            # Increased number of visible launches
             for _, row in events_df.head(14).iterrows():
-                pseudo_date = row.get("Pseudo_Date", "—")
-                pseudo_rocket = row.get("Pseudo_Rocket", row.get("ROCKET NAME", "Unknown"))
-                pseudo_site = row.get("Pseudo_Site", row.get("LAUNCH CENTER", "—"))
-                pseudo_country = row.get("Pseudo_Country", row.get("LAUNCHING STATE", "—"))
-               
+                date_str = row.get("LAUNCH DATE", "—")
+                rocket = row.get("ROCKET NAME", "Unknown")
+                site = row.get("LAUNCH CENTER", "—")
+                country = row.get("LAUNCHING STATE", "—")
+                
                 st.markdown(f"""
                 <div style="background-color: #1a4fa3; padding: 12px; border-radius: 10px;
                             margin-bottom: 10px; color: white; font-size: 0.95rem;">
-                    <strong>{pseudo_rocket}</strong><br>
-                    <small>{pseudo_date} • {pseudo_site}</small><br>
-                    <small>{pseudo_country}</small>
+                    <strong>{rocket}</strong><br>
+                    <small>{date_str} • {site}</small><br>
+                    <small>{country}</small>
                 </div>
                 """, unsafe_allow_html=True)
-           
+            
             if len(events_df) > 14:
                 st.caption(f"... and {len(events_df)-14} more")
+
+    #pseudo code for new right column with anonymization
+        # ==================== RIGHT COLUMN - Extended Launches ====================
+    # with right_col:
+    #     st.subheader("Launches")
+    #     container_activities = st.container(border=True, height=1100)
+       
+    #     with container_activities:
+    #         events_df = df.copy()
+            
+    #         if "LAUNCH_DATE_PARSED" in events_df.columns:
+    #             events_df = events_df.sort_values("LAUNCH_DATE_PARSED", ascending=False)
+            
+    #         # ==================== PSEUDO ANONYMIZATION ====================
+    #         if not events_df.empty:
+    #             # Country Pseudo
+    #             if "LAUNCHING STATE" in events_df.columns:
+    #                 unique_countries = sorted(events_df["LAUNCHING STATE"].dropna().unique())
+    #                 country_mapping = {c: f"Country {chr(65 + i)}" for i, c in enumerate(unique_countries)}
+    #                 events_df["Pseudo_Country"] = events_df["LAUNCHING STATE"].map(country_mapping)
+                
+    #             # Rocket Name Pseudo
+    #             if "ROCKET NAME" in events_df.columns:
+    #                 unique_rockets = sorted(events_df["ROCKET NAME"].dropna().unique())
+    #                 rocket_mapping = {r: f"Rocket {chr(65 + i)}" for i, r in enumerate(unique_rockets)}
+    #                 events_df["Pseudo_Rocket"] = events_df["ROCKET NAME"].map(rocket_mapping)
+                
+    #             # Launch Center Pseudo
+    #             if "LAUNCH CENTER" in events_df.columns:
+    #                 unique_sites = sorted(events_df["LAUNCH CENTER"].dropna().unique())
+    #                 site_mapping = {s: f"Site {chr(65 + i)}" for i, s in enumerate(unique_sites)}
+    #                 events_df["Pseudo_Site"] = events_df["LAUNCH CENTER"].map(site_mapping)
+                
+    #             # Launch Date Pseudo (e.g., Launch #001, Launch #002, ...)
+    #             events_df = events_df.reset_index(drop=True)
+    #             events_df["Pseudo_Date"] = [f"Launch #{str(i+1).zfill(3)}" for i in range(len(events_df))]
+            
+    #         # ==================== DISPLAY ====================
+    #         for _, row in events_df.head(14).iterrows():
+    #             pseudo_date = row.get("Pseudo_Date", "—")
+    #             pseudo_rocket = row.get("Pseudo_Rocket", row.get("ROCKET NAME", "Unknown"))
+    #             pseudo_site = row.get("Pseudo_Site", row.get("LAUNCH CENTER", "—"))
+    #             pseudo_country = row.get("Pseudo_Country", row.get("LAUNCHING STATE", "—"))
+               
+    #             st.markdown(f"""
+    #             <div style="background-color: #1a4fa3; padding: 12px; border-radius: 10px;
+    #                         margin-bottom: 10px; color: white; font-size: 0.95rem;">
+    #                 <strong>{pseudo_rocket}</strong><br>
+    #                 <small>{pseudo_date} • {pseudo_site}</small><br>
+    #                 <small>{pseudo_country}</small>
+    #             </div>
+    #             """, unsafe_allow_html=True)
+           
+    #         if len(events_df) > 14:
+    #             st.caption(f"... and {len(events_df)-14} more")
 
     # ==================== HISTORICAL MAP ====================
     st.divider()
@@ -1832,7 +1986,7 @@ if st.session_state.selected == "Launch Dashboard":
       
 #         st.caption(f"Launch **#{selected_idx + 1}** of **{len(upcoming_df)}**")
 
-#Upcoming Launches Tab (latest - 09 July 2026)
+# #Upcoming Launches Tab (latest - 09 July 2026)
 # elif st.session_state.selected == "Upcoming Launches":
 #     st.subheader("Upcoming Rocket Launches")
 #     st.caption("Live from Google Sheets • Future launches only")
@@ -2017,7 +2171,7 @@ if st.session_state.selected == "Launch Dashboard":
 #             st.markdown("**Drop Zone Summary**")
 #             zone_colors = {
 #                 "Archipelagic Waters": "#FFD700",
-#                 "EEZ": "#00008B",
+#                 "EEZ": "#1976d2",
 #                 "Manila FIR": "#FFA500",
 #                 "Outside PH Zones": "#808080"
 #             }
@@ -2070,21 +2224,21 @@ if st.session_state.selected == "Launch Dashboard":
 #         st.caption(f"Launch **#{selected_idx + 1}** of **{len(upcoming_df)}**")
 #         st.info("💡 **To update a launch:** Delete it here, then go to the **NOTAM Parser** tab and submit the corrected version.")
 
-#pseudo for Upcoming Launches Tab
+#with map_layout
 
 elif st.session_state.selected == "Upcoming Launches":
     st.subheader("Upcoming Rocket Launches")
     st.caption("Live from Google Sheets • Future launches only")
-  
+   
     df = load_launch_database()
     if st.button("🔄 Refresh Data from Google Sheets"):
         load_launch_database.clear()
         st.rerun()
-  
+   
     if df.empty:
         st.info("No launch data available yet. Add some launches using the NOTAM Parser tab.")
         st.stop()
-
+ 
     # Filter upcoming launches
     today = datetime.now().date()
     upcoming_df = df.copy()
@@ -2093,63 +2247,41 @@ elif st.session_state.selected == "Upcoming Launches":
         upcoming_df = upcoming_df.sort_values("LAUNCH_DATE_PARSED").reset_index(drop=True)
     else:
         upcoming_df = pd.DataFrame()
-
+ 
     if upcoming_df.empty:
         st.success("No upcoming launches scheduled at the moment.")
         st.balloons()
         st.info("Check back later or add new launches in the NOTAM Parser tab.")
     else:
         st.success(f"**{len(upcoming_df)} Upcoming Launch(es) Scheduled**")
-      
+       
         if "selected_upcoming_idx" not in st.session_state or st.session_state.selected_upcoming_idx >= len(upcoming_df):
             st.session_state.selected_upcoming_idx = 0
-          
-        # ==================== PSEUDO MAPPING ====================
-        upcoming_df = upcoming_df.copy()
-        
-        # Rocket Name Pseudo
-        if "ROCKET NAME" in upcoming_df.columns:
-            unique_rockets = sorted(upcoming_df["ROCKET NAME"].dropna().unique())
-            rocket_mapping = {r: f"Rocket {chr(65 + i)}" for i, r in enumerate(unique_rockets)}
-            upcoming_df["Pseudo_Rocket"] = upcoming_df["ROCKET NAME"].map(rocket_mapping)
-        
-        # Launch Center Pseudo
-        if "LAUNCH CENTER" in upcoming_df.columns:
-            unique_sites = sorted(upcoming_df["LAUNCH CENTER"].dropna().unique())
-            site_mapping = {s: f"Site {chr(65 + i)}" for i, s in enumerate(unique_sites)}
-            upcoming_df["Pseudo_Site"] = upcoming_df["LAUNCH CENTER"].map(site_mapping)
-        
-        # Launching State (Country) Pseudo
-        if "LAUNCHING STATE" in upcoming_df.columns:
-            unique_countries = sorted(upcoming_df["LAUNCHING STATE"].dropna().unique())
-            country_mapping = {c: f"Country {chr(65 + i)}" for i, c in enumerate(unique_countries)}
-            upcoming_df["Pseudo_Country"] = upcoming_df["LAUNCHING STATE"].map(country_mapping)
-
-        # Launch Selector (using pseudo names)
+           
+        # Launch Selector
         launch_options = [
-            f"{row.get('LAUNCH DATE', '—')} • {row.get('Pseudo_Rocket', row.get('ROCKET NAME', 'Unknown'))} @ {row.get('Pseudo_Site', row.get('LAUNCH CENTER', '—'))}"
+            f"{row.get('LAUNCH DATE', '—')} • {row.get('ROCKET NAME', 'Unknown')} @ {row.get('LAUNCH CENTER', '—')}"
             for _, row in upcoming_df.iterrows()
         ]
-  
+   
         selected_label = st.selectbox(
             "Select a Launch",
             options=launch_options,
             index=st.session_state.selected_upcoming_idx,
             key="upcoming_selector"
         )
-  
+   
         selected_idx = launch_options.index(selected_label)
         if selected_idx != st.session_state.selected_upcoming_idx:
             st.session_state.selected_upcoming_idx = selected_idx
-    
+     
         st.divider()
-        
+
         # ====================== LAYOUT ======================
         selected_row = upcoming_df.iloc[selected_idx]
-        original_row_index = selected_row.name
+        original_row_index = selected_row.name  # Used for deletion
 
         # ====================== DELETE SECTION ======================
-        # (Deletion logic remains unchanged - uses original values)
         col_del1, col_del2 = st.columns([1, 4])
         with col_del1:
             if st.button("🗑️ Delete This Launch", type="secondary", use_container_width=True):
@@ -2158,11 +2290,10 @@ elif st.session_state.selected == "Upcoming Launches":
                 st.session_state["delete_rocket_name"] = selected_row.get('ROCKET NAME')
                 st.rerun()
 
-        # ... [Delete confirmation logic remains the same - no changes needed] ...
         if st.session_state.get("delete_confirm"):
             st.error("⚠️ **Warning:** This will permanently delete the launch from the database.")
             st.warning("After deletion, go to the **NOTAM Parser** tab to submit the updated version.")
-           
+            
             c1, c2 = st.columns(2)
             with c1:
                 if st.button("✅ Yes, Delete Launch", type="primary"):
@@ -2170,21 +2301,22 @@ elif st.session_state.selected == "Upcoming Launches":
                         ws = get_launch_worksheet()
                         spreadsheet = ws.spreadsheet
                         ws = spreadsheet.worksheet(ws.title)
-                       
+                        
                         data = ws.get_all_records()
                         target_row = None
-                       
+                        
                         for idx, row in enumerate(data, start=2):
                             if (str(row.get('LAUNCH DATE', '')).strip() == str(st.session_state["delete_launch_date"]).strip() and
                                 str(row.get('ROCKET NAME', '')).strip() == str(st.session_state["delete_rocket_name"]).strip()):
                                 target_row = idx
                                 break
-                       
+                        
                         if target_row is None:
                             st.error("❌ Could not find the launch in the sheet.")
                         else:
                             ws.delete_rows(target_row)
                             st.success(f"✅ Launch deleted successfully (Row {target_row})!")
+                            
                             load_launch_database.clear()
                             for key in ["delete_confirm", "delete_launch_date", "delete_rocket_name"]:
                                 if key in st.session_state:
@@ -2199,14 +2331,14 @@ elif st.session_state.selected == "Upcoming Launches":
                             del st.session_state[key]
                     st.rerun()
 
-        # ==================== LEFT SIDE - LAUNCH INFO ====================
+        # ==================== LEFT SIDE - LAUNCH INFO + DROPZONE ====================
         left_col, right_col = st.columns([1, 3])
         with left_col:
             st.markdown("**Launch Information**")
             with st.container(border=True):
                 raw_launch_date = selected_row.get('LAUNCH DATE', '—')
                 window_time = selected_row.get('START TO END TIME', '—')
-              
+               
                 try:
                     if raw_launch_date != '—' and raw_launch_date:
                         parsed_date = datetime.strptime(raw_launch_date.strip(), "%m/%d/%Y")
@@ -2215,16 +2347,16 @@ elif st.session_state.selected == "Upcoming Launches":
                         formatted_date = raw_launch_date
                 except:
                     formatted_date = raw_launch_date
-              
+               
                 window_display = f"{formatted_date} between {window_time}" if formatted_date != '—' else window_time
-              
+               
                 metrics = [
-                    ("Rocket Name", selected_row.get('Pseudo_Rocket', selected_row.get('ROCKET NAME', '—'))),
-                    ("Launch Center", selected_row.get('Pseudo_Site', selected_row.get('LAUNCH CENTER', '—'))),
-                    ("Launching State", selected_row.get('Pseudo_Country', selected_row.get('LAUNCHING STATE', '—'))),
+                    ("Rocket Name", selected_row.get('ROCKET NAME', '—')),
+                    ("Launch Center", selected_row.get('LAUNCH CENTER', '—')),
+                    ("Launching State", selected_row.get('LAUNCHING STATE', '—')),
                     ("Date and Time (PhST)", window_display),
                 ]
-              
+               
                 col1, col2 = st.columns(2)
                
                 with col1:
@@ -2270,7 +2402,7 @@ elif st.session_state.selected == "Upcoming Launches":
             st.markdown("**Drop Zone Summary**")
             zone_colors = {
                 "Archipelagic Waters": "#FFD700",
-                "EEZ": "#00008B",
+                "EEZ": "#1976d2",
                 "Manila FIR": "#FFA500",
                 "Outside PH Zones": "#808080"
             }
@@ -2294,7 +2426,7 @@ elif st.session_state.selected == "Upcoming Launches":
                             </div>
                         """, unsafe_allow_html=True)
 
-        # ==================== RIGHT SIDE - MAP ====================
+        # ==================== RIGHT SIDE - MAP + QGIS LAYOUT ====================
         with right_col:
             st.markdown("**Drop Zone Map**")
             dropzones_db = {}
@@ -2319,9 +2451,334 @@ elif st.session_state.selected == "Upcoming Launches":
                 returned_objects=[],
                 key=f"upcoming_map_{selected_idx}"
             )
+
+            # ====================== QGIS MAP LAYOUT (NEW FEATURE) ======================
+            st.markdown("### Drop Zone Map Layout")
+            st.caption("Paste the Google Drive share link (Anyone with the link) for this launch’s map layout.")
+
+            current_map_url = selected_row.get("MAP_URL", "")
+            if current_map_url and str(current_map_url).strip() and str(current_map_url).lower() not in ["nan", "none", ""]:
+                st.success("A map link is already saved for this launch.")
+                
+                # Show View / Download buttons if link exists
+                file_id = None
+                map_url = str(current_map_url).strip()
+                if "/d/" in map_url:
+                    file_id = map_url.split("/d/")[1].split("/")[0]
+                elif "id=" in map_url:
+                    file_id = map_url.split("id=")[1].split("&")[0]
+
+                if file_id:
+                    view_link = f"https://drive.google.com/file/d/{file_id}/view"
+                    download_link = f"https://drive.google.com/uc?export=download&id={file_id}"
+                    
+                    btn1, btn2 = st.columns(2)
+                    with btn1:
+                        st.link_button("🗺️ View Full Map", url=view_link, use_container_width=True)
+                    with btn2:
+                        st.link_button("⬇️ Download Map", url=download_link, use_container_width=True)
+            else:
+                st.info("No map link saved yet for this launch.")
+
+            new_map_url = st.text_input(
+                "Google Drive Share Link",
+                value=str(current_map_url) if current_map_url and str(current_map_url).lower() not in ["nan", "none"] else "",
+                placeholder="https://drive.google.com/file/d/xxxxx/view?usp=sharing",
+                key=f"map_url_input_{selected_idx}"
+            )
+
+            if st.button("💾 Save Map Link", type="primary", use_container_width=True, key=f"save_map_{selected_idx}"):
+                if not new_map_url or not new_map_url.strip():
+                    st.error("Please paste a valid Google Drive link.")
+                else:
+                    try:
+                        ws = get_launch_worksheet()
+                        data = ws.get_all_records()
+
+                        target_row = None
+                        launch_date = str(selected_row.get("LAUNCH DATE", "")).strip()
+                        rocket_name = str(selected_row.get("ROCKET NAME", "")).strip()
+
+                        for idx, row in enumerate(data, start=2):  # row 1 is header
+                            if (str(row.get("LAUNCH DATE", "")).strip() == launch_date and
+                                str(row.get("ROCKET NAME", "")).strip() == rocket_name):
+                                target_row = idx
+                                break
+
+                        if target_row is None:
+                            st.error("Could not find this launch in the Google Sheet.")
+                        else:
+                            headers = ws.row_values(1)
+                            if "MAP_URL" not in headers:
+                                # Automatically add the column if it doesn't exist
+                                ws.update_cell(1, len(headers) + 1, "MAP_URL")
+                                headers.append("MAP_URL")
+
+                            col_index = headers.index("MAP_URL") + 1  # 1-based
+                            ws.update_cell(target_row, col_index, new_map_url.strip())
+
+                            st.success("✅ Map link saved successfully!")
+                            load_launch_database.clear()
+                            st.rerun()
+
+                    except Exception as e:
+                        st.error(f"Failed to save map link: {e}")
      
         st.caption(f"Launch **#{selected_idx + 1}** of **{len(upcoming_df)}**")
         st.info("💡 **To update a launch:** Delete it here, then go to the **NOTAM Parser** tab and submit the corrected version.")
+
+#pseudo for Upcoming Launches Tab
+
+# elif st.session_state.selected == "Upcoming Launches":
+#     st.subheader("Upcoming Rocket Launches")
+#     st.caption("Live from Google Sheets • Future launches only")
+  
+#     df = load_launch_database()
+#     if st.button("🔄 Refresh Data from Google Sheets"):
+#         load_launch_database.clear()
+#         st.rerun()
+  
+#     if df.empty:
+#         st.info("No launch data available yet. Add some launches using the NOTAM Parser tab.")
+#         st.stop()
+
+#     # Filter upcoming launches
+#     today = datetime.now().date()
+#     upcoming_df = df.copy()
+#     if "LAUNCH_DATE_PARSED" in upcoming_df.columns and not upcoming_df.empty:
+#         upcoming_df = upcoming_df[upcoming_df["LAUNCH_DATE_PARSED"].dt.date >= today].copy()
+#         upcoming_df = upcoming_df.sort_values("LAUNCH_DATE_PARSED").reset_index(drop=True)
+#     else:
+#         upcoming_df = pd.DataFrame()
+
+#     if upcoming_df.empty:
+#         st.success("No upcoming launches scheduled at the moment.")
+#         st.balloons()
+#         st.info("Check back later or add new launches in the NOTAM Parser tab.")
+#     else:
+#         st.success(f"**{len(upcoming_df)} Upcoming Launch(es) Scheduled**")
+      
+#         if "selected_upcoming_idx" not in st.session_state or st.session_state.selected_upcoming_idx >= len(upcoming_df):
+#             st.session_state.selected_upcoming_idx = 0
+          
+#         # ==================== PSEUDO MAPPING ====================
+#         upcoming_df = upcoming_df.copy()
+        
+#         # Rocket Name Pseudo
+#         if "ROCKET NAME" in upcoming_df.columns:
+#             unique_rockets = sorted(upcoming_df["ROCKET NAME"].dropna().unique())
+#             rocket_mapping = {r: f"Rocket {chr(65 + i)}" for i, r in enumerate(unique_rockets)}
+#             upcoming_df["Pseudo_Rocket"] = upcoming_df["ROCKET NAME"].map(rocket_mapping)
+        
+#         # Launch Center Pseudo
+#         if "LAUNCH CENTER" in upcoming_df.columns:
+#             unique_sites = sorted(upcoming_df["LAUNCH CENTER"].dropna().unique())
+#             site_mapping = {s: f"Site {chr(65 + i)}" for i, s in enumerate(unique_sites)}
+#             upcoming_df["Pseudo_Site"] = upcoming_df["LAUNCH CENTER"].map(site_mapping)
+        
+#         # Launching State (Country) Pseudo
+#         if "LAUNCHING STATE" in upcoming_df.columns:
+#             unique_countries = sorted(upcoming_df["LAUNCHING STATE"].dropna().unique())
+#             country_mapping = {c: f"Country {chr(65 + i)}" for i, c in enumerate(unique_countries)}
+#             upcoming_df["Pseudo_Country"] = upcoming_df["LAUNCHING STATE"].map(country_mapping)
+
+#         # Launch Selector (using pseudo names)
+#         launch_options = [
+#             f"{row.get('LAUNCH DATE', '—')} • {row.get('Pseudo_Rocket', row.get('ROCKET NAME', 'Unknown'))} @ {row.get('Pseudo_Site', row.get('LAUNCH CENTER', '—'))}"
+#             for _, row in upcoming_df.iterrows()
+#         ]
+  
+#         selected_label = st.selectbox(
+#             "Select a Launch",
+#             options=launch_options,
+#             index=st.session_state.selected_upcoming_idx,
+#             key="upcoming_selector"
+#         )
+  
+#         selected_idx = launch_options.index(selected_label)
+#         if selected_idx != st.session_state.selected_upcoming_idx:
+#             st.session_state.selected_upcoming_idx = selected_idx
+    
+#         st.divider()
+        
+#         # ====================== LAYOUT ======================
+#         selected_row = upcoming_df.iloc[selected_idx]
+#         original_row_index = selected_row.name
+
+#         # ====================== DELETE SECTION ======================
+#         # (Deletion logic remains unchanged - uses original values)
+#         col_del1, col_del2 = st.columns([1, 4])
+#         with col_del1:
+#             if st.button("🗑️ Delete This Launch", type="secondary", use_container_width=True):
+#                 st.session_state["delete_confirm"] = True
+#                 st.session_state["delete_launch_date"] = selected_row.get('LAUNCH DATE')
+#                 st.session_state["delete_rocket_name"] = selected_row.get('ROCKET NAME')
+#                 st.rerun()
+
+#         # ... [Delete confirmation logic remains the same - no changes needed] ...
+#         if st.session_state.get("delete_confirm"):
+#             st.error("⚠️ **Warning:** This will permanently delete the launch from the database.")
+#             st.warning("After deletion, go to the **NOTAM Parser** tab to submit the updated version.")
+           
+#             c1, c2 = st.columns(2)
+#             with c1:
+#                 if st.button("✅ Yes, Delete Launch", type="primary"):
+#                     try:
+#                         ws = get_launch_worksheet()
+#                         spreadsheet = ws.spreadsheet
+#                         ws = spreadsheet.worksheet(ws.title)
+                       
+#                         data = ws.get_all_records()
+#                         target_row = None
+                       
+#                         for idx, row in enumerate(data, start=2):
+#                             if (str(row.get('LAUNCH DATE', '')).strip() == str(st.session_state["delete_launch_date"]).strip() and
+#                                 str(row.get('ROCKET NAME', '')).strip() == str(st.session_state["delete_rocket_name"]).strip()):
+#                                 target_row = idx
+#                                 break
+                       
+#                         if target_row is None:
+#                             st.error("❌ Could not find the launch in the sheet.")
+#                         else:
+#                             ws.delete_rows(target_row)
+#                             st.success(f"✅ Launch deleted successfully (Row {target_row})!")
+#                             load_launch_database.clear()
+#                             for key in ["delete_confirm", "delete_launch_date", "delete_rocket_name"]:
+#                                 if key in st.session_state:
+#                                     del st.session_state[key]
+#                             st.rerun()
+#                     except Exception as e:
+#                         st.error(f"❌ Delete failed: {str(e)}")
+#             with c2:
+#                 if st.button("❌ Cancel", type="secondary"):
+#                     for key in ["delete_confirm", "delete_launch_date", "delete_rocket_name"]:
+#                         if key in st.session_state:
+#                             del st.session_state[key]
+#                     st.rerun()
+
+#         # ==================== LEFT SIDE - LAUNCH INFO ====================
+#         left_col, right_col = st.columns([1, 3])
+#         with left_col:
+#             st.markdown("**Launch Information**")
+#             with st.container(border=True):
+#                 raw_launch_date = selected_row.get('LAUNCH DATE', '—')
+#                 window_time = selected_row.get('START TO END TIME', '—')
+              
+#                 try:
+#                     if raw_launch_date != '—' and raw_launch_date:
+#                         parsed_date = datetime.strptime(raw_launch_date.strip(), "%m/%d/%Y")
+#                         formatted_date = parsed_date.strftime("%d %B %Y")
+#                     else:
+#                         formatted_date = raw_launch_date
+#                 except:
+#                     formatted_date = raw_launch_date
+              
+#                 window_display = f"{formatted_date} between {window_time}" if formatted_date != '—' else window_time
+              
+#                 metrics = [
+#                     ("Rocket Name", selected_row.get('Pseudo_Rocket', selected_row.get('ROCKET NAME', '—'))),
+#                     ("Launch Center", selected_row.get('Pseudo_Site', selected_row.get('LAUNCH CENTER', '—'))),
+#                     ("Launching State", selected_row.get('Pseudo_Country', selected_row.get('LAUNCHING STATE', '—'))),
+#                     ("Date and Time (PhST)", window_display),
+#                 ]
+              
+#                 col1, col2 = st.columns(2)
+               
+#                 with col1:
+#                     title, value = metrics[0]
+#                     with st.container(height=130, border=False):
+#                         st.markdown(f":blue-badge[{title}]")
+#                         st.markdown(f"""
+#                             <div style="font-size: 1.32rem; font-weight: 700; text-align: left; margin-top: 8px; line-height: 1.3;">
+#                                 {value}
+#                             </div>
+#                         """, unsafe_allow_html=True)
+               
+#                 with col2:
+#                     title, value = metrics[1]
+#                     with st.container(height=130, border=False):
+#                         st.markdown(f":blue-badge[{title}]")
+#                         st.markdown(f"""
+#                             <div style="font-size: 1.32rem; font-weight: 700; text-align: left; margin-top: 8px; line-height: 1.3;">
+#                                 {value}
+#                             </div>
+#                         """, unsafe_allow_html=True)
+
+#                 with col1:
+#                     title, value = metrics[2]
+#                     with st.container(height=130, border=False):
+#                         st.markdown(f":blue-badge[{title}]")
+#                         st.markdown(f"""
+#                             <div style="font-size: 1.32rem; font-weight: 700; text-align: left; margin-top: 8px; line-height: 1.3;">
+#                                 {value}
+#                             </div>
+#                         """, unsafe_allow_html=True)
+               
+#                 with col2:
+#                     title, value = metrics[3]
+#                     with st.container(height=130, border=False):
+#                         st.markdown(f":blue-badge[{title}]")
+#                         st.markdown(f"""
+#                             <div style="font-size: 1.32rem; font-weight: 700; text-align: left; margin-top: 8px; line-height: 1.3;">
+#                                 {value}
+#                             </div>
+#                         """, unsafe_allow_html=True)
+
+#             st.markdown("**Drop Zone Summary**")
+#             zone_colors = {
+#                 "Archipelagic Waters": "#FFD700",
+#                 "EEZ": "#00008B",
+#                 "Manila FIR": "#FFA500",
+#                 "Outside PH Zones": "#808080"
+#             }
+           
+#             counts = {
+#                 "Archipelagic Waters": int(selected_row.get("ARCH_COUNT", 0) or 0),
+#                 "EEZ": int(selected_row.get("EEZ_COUNT", 0) or 0),
+#                 "Manila FIR": int(selected_row.get("FIR_COUNT", 0) or 0),
+#                 "Outside PH Zones": int(selected_row.get("OUTSIDE_COUNT", 0) or 0)
+#             }
+           
+#             dz_cols = st.columns(2)
+#             for i, (zone, count) in enumerate(counts.items()):
+#                 color = zone_colors.get(zone, "#1a4fa3")
+#                 with dz_cols[i % 2]:
+#                     with st.container(border=True):
+#                         st.markdown(f":blue-badge[{zone}]")
+#                         st.markdown(f"""
+#                             <div style="font-size: 3.0rem; font-weight: 700; color: {color}; text-align: center; margin-bottom: 16px;">
+#                                 {count}
+#                             </div>
+#                         """, unsafe_allow_html=True)
+
+#         # ==================== RIGHT SIDE - MAP ====================
+#         with right_col:
+#             st.markdown("**Drop Zone Map**")
+#             dropzones_db = {}
+#             for dz_num in range(1, 5):
+#                 dz = f"DZ{dz_num}"
+#                 verts = [str(selected_row.get(f"{dz} P{p}", "")).strip()
+#                         for p in range(1, 9) if str(selected_row.get(f"{dz} P{p}", "")).strip()]
+#                 debs = [str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()
+#                        for p in range(1, 5) if str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()]
+#                 dropzones_db[dz] = {"vertices": verts, "debris": debs}
+         
+#             preview_map = create_folium_map(
+#                 selected_row.get("LAUNCH CENTER", ""),
+#                 dropzones_db,
+#                 st.session_state.shape_dir
+#             )
+        
+#             st_folium(
+#                 preview_map,
+#                 width="100%",
+#                 height=720,
+#                 returned_objects=[],
+#                 key=f"upcoming_map_{selected_idx}"
+#             )
+     
+#         st.caption(f"Launch **#{selected_idx + 1}** of **{len(upcoming_df)}**")
+#         st.info("💡 **To update a launch:** Delete it here, then go to the **NOTAM Parser** tab and submit the corrected version.")
 
 #====================== TAB ROUTING ======================
 
@@ -2648,186 +3105,9 @@ elif st.session_state.selected == "NOTAM Parser":
 
 #Launch Database tab latest (09 July 2026)
 # ====================== LAUNCH DATABASE TAB ======================
-# elif st.session_state.selected == "Launch Database":
-#     st.caption("Live from Google Sheets → Rocket-Launch-Monitoring / Sheet1")
-    
-#     try:
-#         ws = get_launch_worksheet()
-#         data = ws.get_all_records()
-#         database_df = pd.DataFrame(data)
-#         st.success(f"✅ Connected to Google Sheets • {len(database_df)} launches")
-#     except Exception as e:
-#         st.error(f"Could not load database: {e}")
-#         database_df = pd.DataFrame()
-
-#     if len(database_df) == 0:
-#         st.stop()
-
-#     st.subheader("Filters")
-#     col_f1, col_f2, col_f3 = st.columns(3)
-    
-#     with col_f1:
-#         try:
-#             database_df["LAUNCH DATE"] = pd.to_datetime(database_df["LAUNCH DATE"], errors="coerce")
-#             date_filter = st.date_input("Filter by Launch Date", value=None)
-#         except:
-#             date_filter = None
-            
-#     with col_f2:
-#         country_opts = sorted(database_df["LAUNCHING STATE"].dropna().unique().tolist())
-#         countries_sel = st.multiselect("Country", country_opts, default=[])
-        
-#     with col_f3:
-#         center_opts = sorted(database_df["LAUNCH CENTER"].dropna().unique().tolist())
-#         centers_sel = st.multiselect("Launch Center", center_opts, default=[])
-
-#     # Apply filters
-#     filtered_df = database_df.copy()
-#     if date_filter:
-#         filtered_df = filtered_df[filtered_df["LAUNCH DATE"].dt.date == date_filter]
-#     if countries_sel:
-#         filtered_df = filtered_df[filtered_df["LAUNCHING STATE"].isin(countries_sel)]
-#     if centers_sel:
-#         filtered_df = filtered_df[filtered_df["LAUNCH CENTER"].isin(centers_sel)]
-
-#     st.subheader(f"Showing {len(filtered_df)} launches")
-
-#     if len(filtered_df) == 0:
-#         st.info("No launches match your filters.")
-#         st.stop()
-
-#     # Preview Selector
-#     select_options = [
-#         f"{row.get('LAUNCH DATE','—')} | {row.get('ROCKET NAME','Unknown')} | {row.get('LAUNCH CENTER','—')}" 
-#         for _, row in filtered_df.iterrows()
-#     ]
-#     selected_label = st.selectbox("Preview drop zone map for:", select_options)
-#     selected_idx = select_options.index(selected_label)
-#     selected_row = filtered_df.iloc[selected_idx]
-
-#     # ====================== MAIN LAYOUT (Same as Upcoming Launches) ======================
-#     left_col, right_col = st.columns([1, 3])
-
-#     with left_col:
-#                # --- Launch Information ---
-#         st.markdown("**Launch Information**")
-        
-#         with st.container(border=True):
-            
-#             raw_date = selected_row.get('LAUNCH DATE', '—')
-#             window_time = selected_row.get('START TO END TIME', '—')
-            
-#             # Robust Date Formatting
-#             try:
-#                 if pd.isna(raw_date) or raw_date in ['—', None, '']:
-#                     formatted_date = '—'
-#                 else:
-#                     # Handle both string and datetime objects
-#                     dt = pd.to_datetime(raw_date, errors='coerce')
-#                     if pd.isna(dt):
-#                         formatted_date = str(raw_date).split()[0]
-#                     else:
-#                         formatted_date = dt.strftime("%d %B %Y")
-#             except:
-#                 formatted_date = str(raw_date).split()[0] if str(raw_date) != '—' else '—'
-
-#             window_display = f"{formatted_date} between {window_time}" if formatted_date != '—' else window_time
-
-#             metrics = [
-#                 ("Rocket Name", selected_row.get('ROCKET NAME', '—')),
-#                 ("Launch Center", selected_row.get('LAUNCH CENTER', '—')),
-#                 ("Launching State", selected_row.get('LAUNCHING STATE', '—')),
-#                 ("Date and Time (PhST)", window_display),
-#             ]
-            
-#             col1, col2 = st.columns(2)
-            
-#             # First Row
-#             for i in [0, 1]:
-#                 with (col1 if i == 0 else col2):
-#                     title, value = metrics[i]
-#                     with st.container(height=130, border=False):
-#                         st.markdown(f":blue-badge[{title}]")
-#                         st.markdown(f"""
-#                             <div style="font-size: 1.32rem; font-weight: 700; 
-#                                        text-align: left; margin-top: 8px; line-height: 1.3;">
-#                                 {value}
-#                             </div>
-#                         """, unsafe_allow_html=True)
-            
-#             # Second Row
-#             for i in [2, 3]:
-#                 with (col1 if i == 2 else col2):
-#                     title, value = metrics[i]
-#                     with st.container(height=130, border=False):
-#                         st.markdown(f":blue-badge[{title}]")
-#                         st.markdown(f"""
-#                             <div style="font-size: 1.32rem; font-weight: 700; 
-#                                        text-align: left; margin-top: 8px; line-height: 1.3;">
-#                                 {value}
-#                             </div>
-#                         """, unsafe_allow_html=True)
-
-#         # --- Drop Zone Summary ---
-#         st.markdown("**Drop Zone Summary**")
-        
-#         zone_colors = {
-#             "Archipelagic Waters": "#FFD700",
-#             "EEZ": "#00008B",
-#             "Manila FIR": "#FFA500",
-#             "Outside PH Zones": "#808080"
-#         }
-        
-#         counts = {
-#             "Archipelagic Waters": int(selected_row.get("ARCH_COUNT", 0) or 0),
-#             "EEZ": int(selected_row.get("EEZ_COUNT", 0) or 0),
-#             "Manila FIR": int(selected_row.get("FIR_COUNT", 0) or 0),
-#             "Outside PH Zones": int(selected_row.get("OUTSIDE_COUNT", 0) or 0)
-#         }
-        
-#         dz_cols = st.columns(2)
-#         for i, (zone, count) in enumerate(counts.items()):
-#             color = zone_colors.get(zone, "#1a4fa3")
-#             with dz_cols[i % 2]:
-#                 with st.container(border=True):
-#                     st.markdown(f":blue-badge[{zone}]")
-#                     st.markdown(f"""
-#                         <div style="font-size: 3.0rem; font-weight: 700; color: {color}; 
-#                                    text-align: center; margin-bottom: 16px;">
-#                             {count}
-#                         </div>
-#                     """, unsafe_allow_html=True)
-
-#     # ==================== RIGHT SIDE - MAP ====================
-#     with right_col:
-#         st.markdown("**Drop Zone Map**")
-        
-#         dropzones_db = {}
-#         for dz_num in range(1, 5):
-#             dz = f"DZ{dz_num}"
-#             verts = [str(selected_row.get(f"{dz} P{p}", "")).strip()
-#                     for p in range(1, 9) if str(selected_row.get(f"{dz} P{p}", "")).strip()]
-#             debs = [str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()
-#                    for p in range(1, 5) if str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()]
-#             dropzones_db[dz] = {"vertices": verts, "debris": debs}
-        
-#         preview_map = create_folium_map(
-#             selected_row.get("LAUNCH CENTER", ""),
-#             dropzones_db,
-#             st.session_state.shape_dir
-#         )
-        
-#         st_folium(
-#             preview_map,
-#             width="100%",
-#             height=720,
-#             returned_objects=[],
-#             key=f"db_map_{selected_idx}"
-#         )
-
 elif st.session_state.selected == "Launch Database":
     st.caption("Live from Google Sheets → Rocket-Launch-Monitoring / Sheet1")
-   
+    
     try:
         ws = get_launch_worksheet()
         data = ws.get_all_records()
@@ -2836,187 +3116,1058 @@ elif st.session_state.selected == "Launch Database":
     except Exception as e:
         st.error(f"Could not load database: {e}")
         database_df = pd.DataFrame()
-    
+
     if len(database_df) == 0:
         st.stop()
 
-    st.subheader("Filters")
-    col_f1, col_f2, col_f3 = st.columns(3)
-   
-    # ==================== PSEUDO MAPPING ====================
-    database_df = database_df.copy()
-    
-    # Rocket Name Pseudo
-    if "ROCKET NAME" in database_df.columns:
-        unique_rockets = sorted(database_df["ROCKET NAME"].dropna().unique())
-        rocket_mapping = {r: f"Rocket {chr(65 + i)}" for i, r in enumerate(unique_rockets)}
-        database_df["Pseudo_Rocket"] = database_df["ROCKET NAME"].map(rocket_mapping)
-    
-    # Launch Center Pseudo
-    if "LAUNCH CENTER" in database_df.columns:
-        unique_sites = sorted(database_df["LAUNCH CENTER"].dropna().unique())
-        site_mapping = {s: f"Site {chr(65 + i)}" for i, s in enumerate(unique_sites)}
-        database_df["Pseudo_Site"] = database_df["LAUNCH CENTER"].map(site_mapping)
-    
-    # Launching State (Country) Pseudo
-    if "LAUNCHING STATE" in database_df.columns:
-        unique_countries = sorted(database_df["LAUNCHING STATE"].dropna().unique())
-        country_mapping = {c: f"Country {chr(65 + i)}" for i, c in enumerate(unique_countries)}
-        database_df["Pseudo_Country"] = database_df["LAUNCHING STATE"].map(country_mapping)
+    tab_browse, tab_query = st.tabs(["Browse", "Query"])
 
-    # ==================== FILTERS ====================
-    with col_f1:
+    # =====================================================
+    # TAB 1: BROWSE / PREVIEW
+    # =====================================================
+    
+
+    # st.subheader("Filters")
+    # col_f1, col_f2, col_f3 = st.columns(3)
+    
+    # with col_f1:
+    #     try:
+    #         database_df["LAUNCH DATE"] = pd.to_datetime(database_df["LAUNCH DATE"], errors="coerce")
+    #         date_filter = st.date_input("Filter by Launch Date", value=None)
+    #     except:
+    #         date_filter = None
+            
+    # with col_f2:
+    #     country_opts = sorted(database_df["LAUNCHING STATE"].dropna().unique().tolist())
+    #     countries_sel = st.multiselect("Country", country_opts, default=[])
+        
+    # with col_f3:
+    #     center_opts = sorted(database_df["LAUNCH CENTER"].dropna().unique().tolist())
+    #     centers_sel = st.multiselect("Launch Center", center_opts, default=[])
+
+    # # Apply filters
+    # filtered_df = database_df.copy()
+    # if date_filter:
+    #     filtered_df = filtered_df[filtered_df["LAUNCH DATE"].dt.date == date_filter]
+    # if countries_sel:
+    #     filtered_df = filtered_df[filtered_df["LAUNCHING STATE"].isin(countries_sel)]
+    # if centers_sel:
+    #     filtered_df = filtered_df[filtered_df["LAUNCH CENTER"].isin(centers_sel)]
+
+    # st.subheader(f"Showing {len(filtered_df)} launches")
+
+    # if len(filtered_df) == 0:
+    #     st.info("No launches match your filters.")
+    #     st.stop()
+
+    # # Preview Selector
+    # select_options = [
+    #     f"{row.get('LAUNCH DATE','—')} | {row.get('ROCKET NAME','Unknown')} | {row.get('LAUNCH CENTER','—')}" 
+    #     for _, row in filtered_df.iterrows()
+    # ]
+    # selected_label = st.selectbox("Preview drop zone map for:", select_options)
+    # selected_idx = select_options.index(selected_label)
+    # selected_row = filtered_df.iloc[selected_idx]
+    with tab_browse:
+        #st.subheader("Preview Launch")
+        st.subheader("Preview Launch")
+        st.caption("Preview the drop zone map for a selected launch from the database below. Use the filters to narrow down your search.")
+
+        # ====================== FILTERS ======================
+        st.markdown("### Filters")
+
+        # Ensure LAUNCH DATE is datetime
         try:
             database_df["LAUNCH DATE"] = pd.to_datetime(database_df["LAUNCH DATE"], errors="coerce")
-            date_filter = st.date_input("Filter by Launch Date", value=None)
-        except:
-            date_filter = None
-           
-    with col_f2:
-        # Show pseudo country names in filter
-        country_opts = sorted(database_df["Pseudo_Country"].dropna().unique().tolist())
-        countries_sel = st.multiselect("Country", country_opts, default=[])
-       
-    with col_f3:
-        # Show pseudo site names in filter
-        center_opts = sorted(database_df["Pseudo_Site"].dropna().unique().tolist())
-        centers_sel = st.multiselect("Launch Center", center_opts, default=[])
+        except Exception:
+            pass
 
-    # Apply filters (using pseudo for display, real for filtering)
-    filtered_df = database_df.copy()
-    if date_filter:
-        filtered_df = filtered_df[filtered_df["LAUNCH DATE"].dt.date == date_filter]
-    if countries_sel:
-        filtered_df = filtered_df[filtered_df["Pseudo_Country"].isin(countries_sel)]
-    if centers_sel:
-        filtered_df = filtered_df[filtered_df["Pseudo_Site"].isin(centers_sel)]
+        col_f1, col_f2, col_f3, col_f4 = st.columns(4)
 
-    st.subheader(f"Showing {len(filtered_df)} launches")
-    if len(filtered_df) == 0:
-        st.info("No launches match your filters.")
-        st.stop()
+        with col_f1:
+            # Year filter
+            available_years = sorted(
+                database_df["LAUNCH DATE"].dt.year.dropna().unique().astype(int).tolist()
+            )
+            years_sel = st.multiselect(
+                "Year",
+                options=available_years,
+                default=[],
+                placeholder="All years"
+            )
 
-    # Preview Selector (using pseudo names)
-    select_options = [
-        f"{row.get('LAUNCH DATE','—')} | {row.get('Pseudo_Rocket', row.get('ROCKET NAME','Unknown'))} | {row.get('Pseudo_Site', row.get('LAUNCH CENTER','—'))}"
-        for _, row in filtered_df.iterrows()
-    ]
-    
-    selected_label = st.selectbox("Preview drop zone map for:", select_options)
-    selected_idx = select_options.index(selected_label)
-    selected_row = filtered_df.iloc[selected_idx]
+        with col_f2:
+            # Month filter
+            month_options = list(range(1, 13))
+            month_labels = {
+                1: "January", 2: "February", 3: "March", 4: "April",
+                5: "May", 6: "June", 7: "July", 8: "August",
+                9: "September", 10: "October", 11: "November", 12: "December"
+            }
+            months_sel = st.multiselect(
+                "Month",
+                options=month_options,
+                format_func=lambda x: month_labels[x],
+                default=[],
+                placeholder="All months"
+            )
 
-    # ====================== MAIN LAYOUT ======================
-    left_col, right_col = st.columns([1, 3])
-    with left_col:
-        st.markdown("**Launch Information**")
-       
-        with st.container(border=True):
-            raw_date = selected_row.get('LAUNCH DATE', '—')
-            window_time = selected_row.get('START TO END TIME', '—')
-           
-            # Date formatting (unchanged)
+        with col_f3:
+            country_opts = sorted(database_df["LAUNCHING STATE"].dropna().unique().tolist())
+            countries_sel = st.multiselect(
+                "Country",
+                options=country_opts,
+                default=[],
+                placeholder="All countries"
+            )
+
+        with col_f4:
+            center_opts = sorted(database_df["LAUNCH CENTER"].dropna().unique().tolist())
+            centers_sel = st.multiselect(
+                "Launch Center",
+                options=center_opts,
+                default=[],
+                placeholder="All centers"
+            )
+
+        # ====================== APPLY FILTERS ======================
+        filtered_df = database_df.copy()
+
+        if years_sel:
+            filtered_df = filtered_df[filtered_df["LAUNCH DATE"].dt.year.isin(years_sel)]
+
+        if months_sel:
+            filtered_df = filtered_df[filtered_df["LAUNCH DATE"].dt.month.isin(months_sel)]
+
+        if countries_sel:
+            filtered_df = filtered_df[filtered_df["LAUNCHING STATE"].isin(countries_sel)]
+
+        if centers_sel:
+            filtered_df = filtered_df[filtered_df["LAUNCH CENTER"].isin(centers_sel)]
+
+        st.subheader(f"Showing {len(filtered_df)} launches")
+
+        if len(filtered_df) == 0:
+            st.info("No launches match your filters.")
+            st.stop()
+
+        # ====================== PREVIEW SELECTOR ======================
+        def format_launch_date(val):
+            """Format date nicely: 15 July 2024"""
+            if pd.isna(val) or val in [None, "", "—"]:
+                return "—"
             try:
-                if pd.isna(raw_date) or raw_date in ['—', None, '']:
-                    formatted_date = '—'
-                else:
-                    dt = pd.to_datetime(raw_date, errors='coerce')
-                    if pd.isna(dt):
-                        formatted_date = str(raw_date).split()[0]
-                    else:
-                        formatted_date = dt.strftime("%d %B %Y")
-            except:
-                formatted_date = str(raw_date).split()[0] if str(raw_date) != '—' else '—'
+                return pd.to_datetime(val).strftime("%d %B %Y")
+            except Exception:
+                return str(val)
+
+        select_options = [
+            f"{format_launch_date(row.get('LAUNCH DATE'))} | {row.get('ROCKET NAME', 'Unknown')} | {row.get('LAUNCH CENTER', '—')}"
+            for _, row in filtered_df.iterrows()
+        ]
+
+        selected_label = st.selectbox("Preview drop zone map for:", select_options)
+        selected_idx = select_options.index(selected_label)
+        selected_row = filtered_df.iloc[selected_idx]
+
+        # ====================== MAIN LAYOUT (Same as Upcoming Launches) ======================
+        left_col, right_col = st.columns([1, 3])
+
+        with left_col:
+                # --- Launch Information ---
+            st.markdown("**Launch Information**")
+            
+            with st.container(border=True):
                 
-            window_display = f"{formatted_date} between {window_time}" if formatted_date != '—' else window_time
+                raw_date = selected_row.get('LAUNCH DATE', '—')
+                window_time = selected_row.get('START TO END TIME', '—')
+                
+                # Robust Date Formatting
+                try:
+                    if pd.isna(raw_date) or raw_date in ['—', None, '']:
+                        formatted_date = '—'
+                    else:
+                        # Handle both string and datetime objects
+                        dt = pd.to_datetime(raw_date, errors='coerce')
+                        if pd.isna(dt):
+                            formatted_date = str(raw_date).split()[0]
+                        else:
+                            formatted_date = dt.strftime("%d %B %Y")
+                except:
+                    formatted_date = str(raw_date).split()[0] if str(raw_date) != '—' else '—'
+
+                window_display = f"{formatted_date} between {window_time}" if formatted_date != '—' else window_time
+
+                metrics = [
+                    ("Rocket Name", selected_row.get('ROCKET NAME', '—')),
+                    ("Launch Center", selected_row.get('LAUNCH CENTER', '—')),
+                    ("Launching State", selected_row.get('LAUNCHING STATE', '—')),
+                    ("Date and Time (PhST)", window_display),
+                ]
+                
+                col1, col2 = st.columns(2)
+                
+                # First Row
+                for i in [0, 1]:
+                    with (col1 if i == 0 else col2):
+                        title, value = metrics[i]
+                        with st.container(height=130, border=False):
+                            st.markdown(f":blue-badge[{title}]")
+                            st.markdown(f"""
+                                <div style="font-size: 1.32rem; font-weight: 700; 
+                                        text-align: left; margin-top: 8px; line-height: 1.3;">
+                                    {value}
+                                </div>
+                            """, unsafe_allow_html=True)
+                
+                # Second Row
+                for i in [2, 3]:
+                    with (col1 if i == 2 else col2):
+                        title, value = metrics[i]
+                        with st.container(height=130, border=False):
+                            st.markdown(f":blue-badge[{title}]")
+                            st.markdown(f"""
+                                <div style="font-size: 1.32rem; font-weight: 700; 
+                                        text-align: left; margin-top: 8px; line-height: 1.3;">
+                                    {value}
+                                </div>
+                            """, unsafe_allow_html=True)
+
+            # --- Drop Zone Summary ---
+            st.markdown("**Drop Zone Summary**")
+            
+            zone_colors = {
+                "Archipelagic Waters": "#FFD700",
+                "EEZ": "#1976d2",
+                "Manila FIR": "#FFA500",
+                "Outside PH Zones": "#808080"
+            }
+            
+            counts = {
+                "Archipelagic Waters": int(selected_row.get("ARCH_COUNT", 0) or 0),
+                "EEZ": int(selected_row.get("EEZ_COUNT", 0) or 0),
+                "Manila FIR": int(selected_row.get("FIR_COUNT", 0) or 0),
+                "Outside PH Zones": int(selected_row.get("OUTSIDE_COUNT", 0) or 0)
+            }
+            
+            dz_cols = st.columns(2)
+            for i, (zone, count) in enumerate(counts.items()):
+                color = zone_colors.get(zone, "#1a4fa3")
+                with dz_cols[i % 2]:
+                    with st.container(border=True):
+                        st.markdown(f":blue-badge[{zone}]")
+                        st.markdown(f"""
+                            <div style="font-size: 3.0rem; font-weight: 700; color: {color}; 
+                                    text-align: center; margin-bottom: 16px;">
+                                {count}
+                            </div>
+                        """, unsafe_allow_html=True)
+
+        # ==================== RIGHT SIDE - MAP + QGIS LAYOUT ====================
+        with right_col:
+            st.markdown("**Drop Zone Map**")
+            
+            dropzones_db = {}
+            for dz_num in range(1, 5):
+                dz = f"DZ{dz_num}"
+                verts = [str(selected_row.get(f"{dz} P{p}", "")).strip()
+                        for p in range(1, 9) if str(selected_row.get(f"{dz} P{p}", "")).strip()]
+                debs = [str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()
+                    for p in range(1, 5) if str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()]
+                dropzones_db[dz] = {"vertices": verts, "debris": debs}
+            
+            preview_map = create_folium_map(
+                selected_row.get("LAUNCH CENTER", ""),
+                dropzones_db,
+                st.session_state.shape_dir
+            )
+            
+            st_folium(
+                preview_map,
+                width="100%",
+                height=720,
+                returned_objects=[],
+                key=f"db_map_{selected_idx}"
+            )
+
+            # ====================== DROP ZONE MAP LAYOUT ======================
+            st.markdown("### Drop Zone Map Layout")
+            st.caption("Paste the Google Drive share link (Anyone with the link) for this launch’s map layout.")
+
+            current_map_url = str(selected_row.get("MAP_URL", "")).strip()
+            has_valid_link = current_map_url and current_map_url.lower() not in ["nan", "none", ""]
+
+            # Initialize edit mode
+            edit_map_key = f"edit_map_{selected_idx}"
+            if edit_map_key not in st.session_state:
+                st.session_state[edit_map_key] = False
+
+            if has_valid_link and not st.session_state[edit_map_key]:
+                # ----- Link already exists -----
+                st.success("Map layout is available for this launch.")
+
+                file_id = None
+                if "/d/" in current_map_url:
+                    file_id = current_map_url.split("/d/")[1].split("/")[0]
+                elif "id=" in current_map_url:
+                    file_id = current_map_url.split("id=")[1].split("&")[0]
+
+                if file_id:
+                    view_link = f"https://drive.google.com/file/d/{file_id}/view"
+                    download_link = f"https://drive.google.com/uc?export=download&id={file_id}"
+
+                    btn1, btn2 = st.columns(2)
+                    with btn1:
+                        st.link_button("🗺️ View Full Map", url=view_link, use_container_width=True)
+                    with btn2:
+                        st.link_button("⬇️ Download Map", url=download_link, use_container_width=True)
+                else:
+                    st.warning("Could not extract a valid File ID from the saved link.")
+
+                if st.button("✏️ Edit / Change Map Link", use_container_width=True, key=f"edit_map_btn_{selected_idx}"):
+                    st.session_state[edit_map_key] = True
+                    st.rerun()
+
+            else:
+                # ----- No link yet OR user clicked Edit -----
+                if has_valid_link:
+                    st.info("You are editing the existing map link.")
+
+                new_map_url = st.text_input(
+                    "Google Drive Share Link",
+                    value=str(current_map_url) if has_valid_link else "",
+                    placeholder="https://drive.google.com/file/d/xxxxx/view?usp=sharing",
+                    key=f"map_url_input_{selected_idx}"
+                )
+
+                col_save, col_cancel = st.columns(2)
+
+                with col_save:
+                    if st.button("💾 Save Map Link", type="primary", use_container_width=True, key=f"save_map_{selected_idx}"):
+                        if not new_map_url or not new_map_url.strip():
+                            st.error("Please paste a valid Google Drive link.")
+                        else:
+                            try:
+                                ws = get_launch_worksheet()
+
+                                # Use original index from the dataframe
+                                original_index = selected_row.name
+                                target_row = int(original_index) + 2
+
+                                headers = ws.row_values(1)
+
+                                if "MAP_URL" not in headers:
+                                    ws.update_cell(1, len(headers) + 1, "MAP_URL")
+                                    headers.append("MAP_URL")
+
+                                col_index = headers.index("MAP_URL") + 1
+                                ws.update_cell(target_row, col_index, new_map_url.strip())
+
+                                st.success(f"✅ Map link saved successfully! (Sheet row {target_row})")
+                                st.session_state[edit_map_key] = False
+                                load_launch_database.clear()
+                                st.rerun()
+
+                            except Exception as e:
+                                st.error(f"Failed to save map link: {e}")
+
+                with col_cancel:
+                    if has_valid_link and st.button("❌ Cancel Edit", use_container_width=True, key=f"cancel_map_edit_{selected_idx}"):
+                        st.session_state[edit_map_key] = False
+                        st.rerun()
+
+           # ====================== PHILSA ADVISORY ======================
+            # st.markdown("### PhilSA Advisory")
+            # st.caption("Paste the advisory link from the agency website for this launch.")
+
+            # advisory_url = str(selected_row.get("ADVISORY_URL", "")).strip()
+            # has_advisory = advisory_url and advisory_url.lower() not in ["nan", "none", ""]
+
+            # if has_advisory:
+            #     st.success("Advisory link is saved for this launch.")
+            #     st.link_button(
+            #         "📄 View Agency Advisory",
+            #         url=advisory_url,
+            #         use_container_width=True
+            #     )
+            # else:
+            #     st.info("No agency advisory saved yet for this launch.")
+
+            # new_advisory_url = st.text_input(
+            #     "Advisory URL",
+            #     value=str(advisory_url) if advisory_url and str(advisory_url).lower() not in ["nan", "none"] else "",
+            #     placeholder="https://philsa.gov.ph/....",
+            #     key=f"advisory_url_input_{selected_idx}"
+            # )
+
+            # if st.button("💾 Save Advisory Link", type="primary", use_container_width=True, key=f"save_advisory_{selected_idx}"):
+            #     if not new_advisory_url or not new_advisory_url.strip():
+            #         st.error("Please paste a valid advisory link.")
+            #     else:
+            #         try:
+            #             ws = get_launch_worksheet()
+
+            #             # Use the original index from the dataframe
+            #             # selected_row.name is the original position in database_df
+            #             original_index = selected_row.name
+
+            #             # Google Sheet: row 1 = header, data starts at row 2
+            #             # pandas index is 0-based → sheet row = index + 2
+            #             target_row = int(original_index) + 2
+
+            #             headers = ws.row_values(1)
+
+            #             if "ADVISORY_URL" not in headers:
+            #                 # Automatically add the column if it doesn't exist
+            #                 ws.update_cell(1, len(headers) + 1, "ADVISORY_URL")
+            #                 headers.append("ADVISORY_URL")
+
+            #             col_index = headers.index("ADVISORY_URL") + 1
+            #             ws.update_cell(target_row, col_index, new_advisory_url.strip())
+
+            #             st.success(f"✅ Advisory link saved successfully! (Sheet row {target_row})")
+            #             load_launch_database.clear()
+            #             st.rerun()
+
+            #         except Exception as e:
+            #             st.error(f"Failed to save advisory link: {e}")
            
-            metrics = [
-                ("Rocket Name", selected_row.get('Pseudo_Rocket', selected_row.get('ROCKET NAME', '—'))),
-                ("Launch Center", selected_row.get('Pseudo_Site', selected_row.get('LAUNCH CENTER', '—'))),
-                ("Launching State", selected_row.get('Pseudo_Country', selected_row.get('LAUNCHING STATE', '—'))),
-                ("Date and Time (PhST)", window_display),
+            # ====================== PHILSA ADVISORY ======================
+            st.markdown("### PhilSA Advisory")
+            st.caption("Paste the advisory link from the agency website for this launch.")
+
+            advisory_url = str(selected_row.get("ADVISORY_URL", "")).strip()
+            has_advisory = advisory_url and advisory_url.lower() not in ["nan", "none", ""]
+
+            # Initialize edit mode in session state
+            edit_key = f"edit_advisory_{selected_idx}"
+            if edit_key not in st.session_state:
+                st.session_state[edit_key] = False
+
+            if has_advisory and not st.session_state[edit_key]:
+                # ----- Link already exists -----
+                st.success("Advisory link is saved for this launch.")
+                
+                st.link_button(
+                    "📄 View Agency Advisory",
+                    url=advisory_url,
+                    use_container_width=True
+                )
+
+                if st.button("✏️ Edit / Change Advisory Link", use_container_width=True, key=f"edit_btn_{selected_idx}"):
+                    st.session_state[edit_key] = True
+                    st.rerun()
+
+            else:
+                # ----- No link yet OR user clicked Edit -----
+                if has_advisory:
+                    st.info("You are editing the existing advisory link.")
+
+                new_advisory_url = st.text_input(
+                    "Advisory URL",
+                    value=str(advisory_url) if has_advisory else "",
+                    placeholder="https://philsa.gov.ph/....",
+                    key=f"advisory_url_input_{selected_idx}"
+                )
+
+                col_save, col_cancel = st.columns(2)
+
+                with col_save:
+                    if st.button("💾 Save Advisory Link", type="primary", use_container_width=True, key=f"save_advisory_{selected_idx}"):
+                        if not new_advisory_url or not new_advisory_url.strip():
+                            st.error("Please paste a valid advisory link.")
+                        else:
+                            try:
+                                ws = get_launch_worksheet()
+
+                                original_index = selected_row.name
+                                target_row = int(original_index) + 2
+
+                                headers = ws.row_values(1)
+
+                                if "ADVISORY_URL" not in headers:
+                                    ws.update_cell(1, len(headers) + 1, "ADVISORY_URL")
+                                    headers.append("ADVISORY_URL")
+
+                                col_index = headers.index("ADVISORY_URL") + 1
+                                ws.update_cell(target_row, col_index, new_advisory_url.strip())
+
+                                st.success(f"✅ Advisory link saved successfully! (Sheet row {target_row})")
+                                st.session_state[edit_key] = False
+                                load_launch_database.clear()
+                                st.rerun()
+
+                            except Exception as e:
+                                st.error(f"Failed to save advisory link: {e}")
+
+                with col_cancel:
+                    if has_advisory and st.button("❌ Cancel Edit", use_container_width=True, key=f"cancel_edit_{selected_idx}"):
+                        st.session_state[edit_key] = False
+                        st.rerun()
+
+    with tab_query:
+        st.subheader("Query Launch Database")
+        st.caption("Filter launches and explore results with summary, map, and charts")
+
+        # ====================== FILTERS ======================
+        st.markdown("### Filters")
+
+        qcol1, qcol2, qcol3, qcol4 = st.columns(4)
+
+        with qcol1:
+            q_years = st.multiselect(
+                "Year",
+                options=available_years,
+                default=[],
+                placeholder="All years",
+                key="query_years"
+            )
+
+        with qcol2:
+            q_months = st.multiselect(
+                "Month",
+                options=month_options,
+                format_func=lambda x: month_labels[x],
+                default=[],
+                placeholder="All months",
+                key="query_months"
+            )
+
+        with qcol3:
+            q_countries = st.multiselect(
+                "Launching State",
+                options=country_opts,
+                default=[],
+                placeholder="All states",
+                key="query_countries"
+            )
+
+        with qcol4:
+            q_centers = st.multiselect(
+                "Launch Center",
+                options=center_opts,
+                default=[],
+                placeholder="All centers",
+                key="query_centers"
+            )
+
+        # Apply filters
+        query_df = database_df.copy()
+
+        if q_years:
+            query_df = query_df[query_df["LAUNCH DATE"].dt.year.isin(q_years)]
+        if q_months:
+            query_df = query_df[query_df["LAUNCH DATE"].dt.month.isin(q_months)]
+        if q_countries:
+            query_df = query_df[query_df["LAUNCHING STATE"].isin(q_countries)]
+        if q_centers:
+            query_df = query_df[query_df["LAUNCH CENTER"].isin(q_centers)]
+
+        st.markdown(f"**Results: {len(query_df)} launches**")
+
+        if query_df.empty:
+            st.warning("No launches match your current filters.")
+            st.stop()
+
+        # ====================== CALCULATE METRICS ======================
+        for col in ["ARCH_COUNT", "EEZ_COUNT", "FIR_COUNT", "OUTSIDE_COUNT", "DZ_COUNT"]:
+            if col in query_df.columns:
+                query_df[col] = pd.to_numeric(query_df[col], errors="coerce").fillna(0)
+
+        total_launches = len(query_df)
+        total_dz = int(query_df["DZ_COUNT"].sum()) if "DZ_COUNT" in query_df.columns else 0
+        arch_count = int(query_df["ARCH_COUNT"].sum()) if "ARCH_COUNT" in query_df.columns else 0
+        eez_count = int(query_df["EEZ_COUNT"].sum()) if "EEZ_COUNT" in query_df.columns else 0
+        fir_count = int(query_df["FIR_COUNT"].sum()) if "FIR_COUNT" in query_df.columns else 0
+        outside_count = int(query_df["OUTSIDE_COUNT"].sum()) if "OUTSIDE_COUNT" in query_df.columns else 0
+
+        # ----- Top Launch Site (combine Wenchang + Hainan) -----
+        def normalize_site(site):
+            if pd.isna(site):
+                return "Unknown"
+            site = str(site).strip()
+            if site in ["Wenchang Space Launch Site", "Hainan International Commercial Launch Center"]:
+                return "Wenchang / Hainan"
+            return site
+
+        query_df["SITE_NORMALIZED"] = query_df["LAUNCH CENTER"].apply(normalize_site)
+        site_counts = query_df["SITE_NORMALIZED"].value_counts()
+        top_site = site_counts.idxmax() if not site_counts.empty else "—"
+        top_site_count = int(site_counts.max()) if not site_counts.empty else 0
+
+        # ====================== TOP SECTION: Summary + Map ======================
+        left_col, right_col = st.columns([1, 3])
+
+        # ---------- LEFT: SUMMARY (1 container, 2 columns) ----------
+        # ---------- LEFT: SUMMARY ----------
+        with left_col:
+            st.markdown("### Launch Summary")
+
+            # Calculate top country
+            country_counts = query_df["LAUNCHING STATE"].value_counts()
+            top_country = country_counts.idxmax() if not country_counts.empty else "—"
+            top_country_count = int(country_counts.max()) if not country_counts.empty else 0
+
+            # Calculate top site (Wenchang + Hainan combined)
+            def normalize_site(site):
+                if pd.isna(site):
+                    return "Unknown"
+                site = str(site).strip()
+                if site in ["Wenchang Space Launch Site", "Hainan International Commercial Launch Center"]:
+                    return "Wenchang / Hainan"
+                return site
+
+            query_df["SITE_NORMALIZED"] = query_df["LAUNCH CENTER"].apply(normalize_site)
+            site_counts = query_df["SITE_NORMALIZED"].value_counts()
+            top_site = site_counts.idxmax() if not site_counts.empty else "—"
+            top_site_count = int(site_counts.max()) if not site_counts.empty else 0
+
+            # ====================== CONTAINER 1 ======================
+            # Total Launches, Debris Retrieved, Top Launching Country, Top Launch Site
+            metrics1 = [
+                ("Total Launches", total_launches),
+                ("Debris Retrieved (all years)", 11),
+                ("Top Launching Country", f"{top_country}<br>{top_country_count}"),
+                ("Top Launch Site", f"{top_site}<br>{top_site_count}"),
             ]
-           
-            col1, col2 = st.columns(2)
-           
-            for i in [0, 1]:
-                with (col1 if i == 0 else col2):
-                    title, value = metrics[i]
-                    with st.container(height=130, border=False):
-                        st.markdown(f":blue-badge[{title}]")
-                        st.markdown(f"""
-                            <div style="font-size: 1.32rem; font-weight: 700;
-                                       text-align: left; margin-top: 8px; line-height: 1.3;">
-                                {value}
-                            </div>
-                        """, unsafe_allow_html=True)
-           
-            for i in [2, 3]:
-                with (col1 if i == 2 else col2):
-                    title, value = metrics[i]
-                    with st.container(height=130, border=False):
-                        st.markdown(f":blue-badge[{title}]")
-                        st.markdown(f"""
-                            <div style="font-size: 1.32rem; font-weight: 700;
-                                       text-align: left; margin-top: 8px; line-height: 1.3;">
-                                {value}
-                            </div>
-                        """, unsafe_allow_html=True)
 
-        # Drop Zone Summary (unchanged)
-        st.markdown("**Drop Zone Summary**")
-        zone_colors = {
-            "Archipelagic Waters": "#FFD700",
-            "EEZ": "#00008B",
-            "Manila FIR": "#FFA500",
-            "Outside PH Zones": "#808080"
-        }
-       
-        counts = {
-            "Archipelagic Waters": int(selected_row.get("ARCH_COUNT", 0) or 0),
-            "EEZ": int(selected_row.get("EEZ_COUNT", 0) or 0),
-            "Manila FIR": int(selected_row.get("FIR_COUNT", 0) or 0),
-            "Outside PH Zones": int(selected_row.get("OUTSIDE_COUNT", 0) or 0)
-        }
-       
-        dz_cols = st.columns(2)
-        for i, (zone, count) in enumerate(counts.items()):
-            color = zone_colors.get(zone, "#1a4fa3")
-            with dz_cols[i % 2]:
-                with st.container(border=True):
-                    st.markdown(f":blue-badge[{zone}]")
-                    st.markdown(f"""
-                        <div style="font-size: 3.0rem; font-weight: 700; color: {color};
-                                   text-align: center; margin-bottom: 16px;">
-                            {count}
-                        </div>
-                    """, unsafe_allow_html=True)
+            with st.container(border=True):
+                col1, col2 = st.columns(2)
 
-    # ==================== RIGHT SIDE - MAP ====================
-    with right_col:
-        st.markdown("**Drop Zone Map**")
-       
-        dropzones_db = {}
-        for dz_num in range(1, 5):
-            dz = f"DZ{dz_num}"
-            verts = [str(selected_row.get(f"{dz} P{p}", "")).strip()
-                    for p in range(1, 9) if str(selected_row.get(f"{dz} P{p}", "")).strip()]
-            debs = [str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()
-                   for p in range(1, 5) if str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()]
-            dropzones_db[dz] = {"vertices": verts, "debris": debs}
-       
-        preview_map = create_folium_map(
-            selected_row.get("LAUNCH CENTER", ""),   # Keep original for map centering
-            dropzones_db,
-            st.session_state.shape_dir
+                for i in [0, 1]:
+                    with (col1 if i == 0 else col2):
+                        title, value = metrics1[i]
+                        with st.container(height=130, border=False):
+                            st.markdown(f":blue-badge[{title}]")
+                            st.markdown(f"""
+                                <div style="font-size: 1.8rem; font-weight: 700; 
+                                            text-align: left; margin-top: 8px; line-height: 1.3;">
+                                    {value}
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                for i in [2, 3]:
+                    with (col1 if i == 2 else col2):
+                        title, value = metrics1[i]
+                        with st.container(height=130, border=False):
+                            st.markdown(f":blue-badge[{title}]")
+                            st.markdown(f"""
+                                <div style="font-size: 1.4rem; font-weight: 700; 
+                                            text-align: left; margin-top: 8px; line-height: 1.3;">
+                                    {value}
+                                </div>
+                            """, unsafe_allow_html=True)
+
+            # ====================== CONTAINER 2 ======================
+            # Total Drop Zones, Archipelagic Waters, EEZ, Manila FIR
+            st.markdown("### Drop Zone Summary")
+            metrics2 = [
+                ("Total Drop Zones", total_dz),
+                ("Archipelagic Waters", arch_count),
+                ("EEZ", eez_count),
+                ("Manila FIR", fir_count),
+            ]
+
+            with st.container(border=True):
+                col1, col2 = st.columns(2)
+
+                for i in [0, 3]:
+                    with (col1 if i == 0 else col2):
+                        title, value = metrics2[i]
+                        with st.container(height=130, border=False):
+                            st.markdown(f":blue-badge[{title}]")
+                            st.markdown(f"""
+                                <div style="font-size: 1.8rem; font-weight: 700; 
+                                            text-align: left; margin-top: 8px; line-height: 1.3;">
+                                    {value}
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                for i in [2, 1]:
+                    with (col1 if i == 2 else col2):
+                        title, value = metrics2[i]
+                        with st.container(height=130, border=False):
+                            st.markdown(f":blue-badge[{title}]")
+                            st.markdown(f"""
+                                <div style="font-size: 1.8rem; font-weight: 700; 
+                                            text-align: left; margin-top: 8px; line-height: 1.3;">
+                                    {value}
+                                </div>
+                            """, unsafe_allow_html=True)
+
+            # st.markdown("**Drop Zone Breakdown**")
+
+            # zone_colors = {
+            #     "Archipelagic Waters": "#FFD700",
+            #     "EEZ": "#00008B",
+            #     "Manila FIR": "#FFA500",
+            #     "Outside PH Zones": "#808080"
+            # }
+            # counts = {
+            #     "Archipelagic Waters": arch_count,
+            #     "EEZ": eez_count,
+            #     "Manila FIR": fir_count,
+            #     "Outside PH Zones": outside_count
+            # }
+
+            # dz_cols = st.columns(2)
+            # for i, (zone, count) in enumerate(counts.items()):
+            #     color = zone_colors.get(zone, "#1a4fa3")
+            #     with dz_cols[i % 2]:
+            #         with st.container(border=True):
+            #             st.markdown(f":blue-badge[{zone}]")
+            #             st.markdown(f"""
+            #                 <div style="font-size: 2.3rem; font-weight: 700; color: {color}; 
+            #                         text-align: center; margin-bottom: 10px;">
+            #                     {count}
+            #                 </div>
+            #             """, unsafe_allow_html=True)
+
+        # ---------- RIGHT: MAP ----------
+        with right_col:
+            st.markdown("### Drop Zone Map (Filtered Results)")
+            st.caption("All drop zones from launches matching your filters")
+
+            if not query_df.empty:
+                query_map = create_historical_map(query_df, st.session_state.shape_dir)
+                st_folium(
+                    query_map,
+                    width="100%",
+                    height=620,
+                    returned_objects=[],
+                    key="query_map"
+                )
+            else:
+                st.info("No drop zones to display.")
+
+        st.divider()
+
+        # ====================== CHARTS SECTION ======================
+        st.markdown("### Charts")
+
+        chart_left, chart_right = st.columns(2)
+
+        # Left: Drop Zones by Maritime Zone
+        with chart_left:
+            st.markdown("**Drop Zones by Maritime Zone**")
+            zone_data = pd.DataFrame({
+                "Zone": ["Archipelagic Waters", "EEZ", "Manila FIR", "Outside PH Zones"],
+                "Count": [arch_count, eez_count, fir_count, outside_count]
+            })
+
+            fig_zone = px.bar(
+                zone_data,
+                x="Zone",
+                y="Count",
+                text="Count",
+                color="Zone",
+                color_discrete_sequence=["#FFD700", "#00008B", "#FFA500", "#808080"],
+                height=400,
+                template="plotly"
+            )
+            fig_zone.update_traces(textposition="outside", textfont_size=15)
+            fig_zone.update_layout(
+                showlegend=False,
+                xaxis_title="",
+                yaxis_title="Number of Drop Zones",
+                margin=dict(t=20, b=40)
+            )
+            st.plotly_chart(fig_zone, use_container_width=True)
+
+        # Right: Launches by Launching State
+        with chart_right:
+            st.markdown("**Launches by Launching State**")
+            country_counts = query_df["LAUNCHING STATE"].value_counts().reset_index()
+            country_counts.columns = ["Country", "Launches"]
+
+            fig_country = px.pie(
+                country_counts,
+                names="Country",
+                values="Launches",
+                hole=0.42,
+                height=400,
+                color_discrete_sequence=px.colors.qualitative.Set2
+            )
+            fig_country.update_traces(textinfo="percent", textfont_size=15)
+            fig_country.update_layout(margin=dict(t=45, b=45))
+            st.plotly_chart(fig_country, use_container_width=True)
+
+       # Full width: Launches by Year (Line Chart)
+        st.markdown("**Launches by Year**")
+
+        year_counts = (
+            query_df["LAUNCH DATE"].dt.year
+            .value_counts()
+            .sort_index()
+            .reset_index()
         )
-       
-        st_folium(
-            preview_map,
-            width="100%",
-            height=720,
-            returned_objects=[],
-            key=f"db_map_{selected_idx}"
+        year_counts.columns = ["Year", "Launches"]
+        year_counts["Year"] = year_counts["Year"].astype(int)
+
+        fig_year = px.line(
+            year_counts,
+            x="Year",
+            y="Launches",
+            markers=True,
+            text="Launches",               # Show values on markers
+            template="plotly",
+            height=400
         )
+
+        fig_year.update_traces(
+            line=dict(color="#1976d2", width=3),
+            marker=dict(size=9),
+            textposition="top center",
+            textfont_size=14
+        )
+
+        fig_year.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Number of Launches",
+            margin=dict(t=30, b=40),
+            xaxis=dict(
+                dtick=1,                   # Force yearly increments
+                tickmode="linear",
+                type="linear"
+            )
+        )
+
+        st.plotly_chart(fig_year, use_container_width=True)
+        st.divider()
+
+        # ====================== TABLE + DOWNLOAD ======================
+        st.markdown("### Filtered Results")
+
+        display_cols = [
+            "LAUNCH DATE", "ROCKET NAME", "LAUNCHING STATE", "LAUNCH CENTER",
+            "START TO END TIME", "DZ_COUNT", "ARCH_COUNT", "EEZ_COUNT", "FIR_COUNT", "OUTSIDE_COUNT"
+        ]
+        display_cols = [c for c in display_cols if c in query_df.columns]
+
+        display_df = query_df[display_cols].copy()
+        if "LAUNCH DATE" in display_df.columns:
+            display_df["LAUNCH DATE"] = display_df["LAUNCH DATE"].dt.strftime("%d %B %Y")
+
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
+
+        dl1, dl2 = st.columns(2)
+        with dl1:
+            csv = query_df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                "📥 Download CSV",
+                data=csv,
+                file_name="query_results.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="query_csv"
+            )
+        with dl2:
+            excel_buffer = io.BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+                query_df.to_excel(writer, index=False, sheet_name="Query Results")
+            excel_buffer.seek(0)
+            st.download_button(
+                "📥 Download Excel",
+                data=excel_buffer,
+                file_name="query_results.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+                key="query_excel"
+            )
+
+#pseudo mapping for Launch Database tab (09 July 2026)
+# elif st.session_state.selected == "Launch Database":
+#     st.caption("Live from Google Sheets → Rocket-Launch-Monitoring / Sheet1")
+   
+#     try:
+#         ws = get_launch_worksheet()
+#         data = ws.get_all_records()
+#         database_df = pd.DataFrame(data)
+#         st.success(f"✅ Connected to Google Sheets • {len(database_df)} launches")
+#     except Exception as e:
+#         st.error(f"Could not load database: {e}")
+#         database_df = pd.DataFrame()
+    
+#     if len(database_df) == 0:
+#         st.stop()
+
+#     st.subheader("Filters")
+#     col_f1, col_f2, col_f3 = st.columns(3)
+   
+#     # ==================== PSEUDO MAPPING ====================
+#     database_df = database_df.copy()
+    
+#     # Rocket Name Pseudo
+#     if "ROCKET NAME" in database_df.columns:
+#         unique_rockets = sorted(database_df["ROCKET NAME"].dropna().unique())
+#         rocket_mapping = {r: f"Rocket {chr(65 + i)}" for i, r in enumerate(unique_rockets)}
+#         database_df["Pseudo_Rocket"] = database_df["ROCKET NAME"].map(rocket_mapping)
+    
+#     # Launch Center Pseudo
+#     if "LAUNCH CENTER" in database_df.columns:
+#         unique_sites = sorted(database_df["LAUNCH CENTER"].dropna().unique())
+#         site_mapping = {s: f"Site {chr(65 + i)}" for i, s in enumerate(unique_sites)}
+#         database_df["Pseudo_Site"] = database_df["LAUNCH CENTER"].map(site_mapping)
+    
+#     # Launching State (Country) Pseudo
+#     if "LAUNCHING STATE" in database_df.columns:
+#         unique_countries = sorted(database_df["LAUNCHING STATE"].dropna().unique())
+#         country_mapping = {c: f"Country {chr(65 + i)}" for i, c in enumerate(unique_countries)}
+#         database_df["Pseudo_Country"] = database_df["LAUNCHING STATE"].map(country_mapping)
+
+#     # ==================== FILTERS ====================
+#     with col_f1:
+#         try:
+#             database_df["LAUNCH DATE"] = pd.to_datetime(database_df["LAUNCH DATE"], errors="coerce")
+#             date_filter = st.date_input("Filter by Launch Date", value=None)
+#         except:
+#             date_filter = None
+           
+#     with col_f2:
+#         # Show pseudo country names in filter
+#         country_opts = sorted(database_df["Pseudo_Country"].dropna().unique().tolist())
+#         countries_sel = st.multiselect("Country", country_opts, default=[])
+       
+#     with col_f3:
+#         # Show pseudo site names in filter
+#         center_opts = sorted(database_df["Pseudo_Site"].dropna().unique().tolist())
+#         centers_sel = st.multiselect("Launch Center", center_opts, default=[])
+
+#     # Apply filters (using pseudo for display, real for filtering)
+#     filtered_df = database_df.copy()
+#     if date_filter:
+#         filtered_df = filtered_df[filtered_df["LAUNCH DATE"].dt.date == date_filter]
+#     if countries_sel:
+#         filtered_df = filtered_df[filtered_df["Pseudo_Country"].isin(countries_sel)]
+#     if centers_sel:
+#         filtered_df = filtered_df[filtered_df["Pseudo_Site"].isin(centers_sel)]
+
+#     st.subheader(f"Showing {len(filtered_df)} launches")
+#     if len(filtered_df) == 0:
+#         st.info("No launches match your filters.")
+#         st.stop()
+
+#     # Preview Selector (using pseudo names)
+#     select_options = [
+#         f"{row.get('LAUNCH DATE','—')} | {row.get('Pseudo_Rocket', row.get('ROCKET NAME','Unknown'))} | {row.get('Pseudo_Site', row.get('LAUNCH CENTER','—'))}"
+#         for _, row in filtered_df.iterrows()
+#     ]
+    
+#     selected_label = st.selectbox("Preview drop zone map for:", select_options)
+#     selected_idx = select_options.index(selected_label)
+#     selected_row = filtered_df.iloc[selected_idx]
+
+#     # ====================== MAIN LAYOUT ======================
+#     left_col, right_col = st.columns([1, 3])
+#     with left_col:
+#         st.markdown("**Launch Information**")
+       
+#         with st.container(border=True):
+#             raw_date = selected_row.get('LAUNCH DATE', '—')
+#             window_time = selected_row.get('START TO END TIME', '—')
+           
+#             # Date formatting (unchanged)
+#             try:
+#                 if pd.isna(raw_date) or raw_date in ['—', None, '']:
+#                     formatted_date = '—'
+#                 else:
+#                     dt = pd.to_datetime(raw_date, errors='coerce')
+#                     if pd.isna(dt):
+#                         formatted_date = str(raw_date).split()[0]
+#                     else:
+#                         formatted_date = dt.strftime("%d %B %Y")
+#             except:
+#                 formatted_date = str(raw_date).split()[0] if str(raw_date) != '—' else '—'
+                
+#             window_display = f"{formatted_date} between {window_time}" if formatted_date != '—' else window_time
+           
+#             metrics = [
+#                 ("Rocket Name", selected_row.get('Pseudo_Rocket', selected_row.get('ROCKET NAME', '—'))),
+#                 ("Launch Center", selected_row.get('Pseudo_Site', selected_row.get('LAUNCH CENTER', '—'))),
+#                 ("Launching State", selected_row.get('Pseudo_Country', selected_row.get('LAUNCHING STATE', '—'))),
+#                 ("Date and Time (PhST)", window_display),
+#             ]
+           
+#             col1, col2 = st.columns(2)
+           
+#             for i in [0, 1]:
+#                 with (col1 if i == 0 else col2):
+#                     title, value = metrics[i]
+#                     with st.container(height=130, border=False):
+#                         st.markdown(f":blue-badge[{title}]")
+#                         st.markdown(f"""
+#                             <div style="font-size: 1.32rem; font-weight: 700;
+#                                        text-align: left; margin-top: 8px; line-height: 1.3;">
+#                                 {value}
+#                             </div>
+#                         """, unsafe_allow_html=True)
+           
+#             for i in [2, 3]:
+#                 with (col1 if i == 2 else col2):
+#                     title, value = metrics[i]
+#                     with st.container(height=130, border=False):
+#                         st.markdown(f":blue-badge[{title}]")
+#                         st.markdown(f"""
+#                             <div style="font-size: 1.32rem; font-weight: 700;
+#                                        text-align: left; margin-top: 8px; line-height: 1.3;">
+#                                 {value}
+#                             </div>
+#                         """, unsafe_allow_html=True)
+
+#         # Drop Zone Summary (unchanged)
+#         st.markdown("**Drop Zone Summary**")
+#         zone_colors = {
+#             "Archipelagic Waters": "#FFD700",
+#             "EEZ": "#00008B",
+#             "Manila FIR": "#FFA500",
+#             "Outside PH Zones": "#808080"
+#         }
+       
+#         counts = {
+#             "Archipelagic Waters": int(selected_row.get("ARCH_COUNT", 0) or 0),
+#             "EEZ": int(selected_row.get("EEZ_COUNT", 0) or 0),
+#             "Manila FIR": int(selected_row.get("FIR_COUNT", 0) or 0),
+#             "Outside PH Zones": int(selected_row.get("OUTSIDE_COUNT", 0) or 0)
+#         }
+       
+#         dz_cols = st.columns(2)
+#         for i, (zone, count) in enumerate(counts.items()):
+#             color = zone_colors.get(zone, "#1a4fa3")
+#             with dz_cols[i % 2]:
+#                 with st.container(border=True):
+#                     st.markdown(f":blue-badge[{zone}]")
+#                     st.markdown(f"""
+#                         <div style="font-size: 3.0rem; font-weight: 700; color: {color};
+#                                    text-align: center; margin-bottom: 16px;">
+#                             {count}
+#                         </div>
+#                     """, unsafe_allow_html=True)
+
+#     # ==================== RIGHT SIDE - MAP ====================
+#     with right_col:
+#         st.markdown("**Drop Zone Map**")
+       
+#         dropzones_db = {}
+#         for dz_num in range(1, 5):
+#             dz = f"DZ{dz_num}"
+#             verts = [str(selected_row.get(f"{dz} P{p}", "")).strip()
+#                     for p in range(1, 9) if str(selected_row.get(f"{dz} P{p}", "")).strip()]
+#             debs = [str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()
+#                    for p in range(1, 5) if str(selected_row.get(f"DEB{dz_num} P{p}", "")).strip()]
+#             dropzones_db[dz] = {"vertices": verts, "debris": debs}
+       
+#         preview_map = create_folium_map(
+#             selected_row.get("LAUNCH CENTER", ""),   # Keep original for map centering
+#             dropzones_db,
+#             st.session_state.shape_dir
+#         )
+       
+#         st_folium(
+#             preview_map,
+#             width="100%",
+#             height=720,
+#             returned_objects=[],
+#             key=f"db_map_{selected_idx}"
+#         )
                 
 st.caption("Compiled by the Space Mission Control and Operations Division (SMCOD) of the Philippine Space Agency (PhilSA)")
