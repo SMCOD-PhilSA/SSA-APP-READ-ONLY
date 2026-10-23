@@ -62,8 +62,9 @@ st.markdown("""
 selected_option = option_menu(
     menu_title=None,
     #options=["NOTAM Parser", "Launch Dashboard", "Launch Database"],
-    options=["Launch Dashboard", "Upcoming Launches", "NOTAM Parser", "Launch Database"],
-    icons=["bi bi-bar-chart-fill", "bi bi-rocket-takeoff-fill", "bi-cloud-upload", "bi bi-filter"],
+    #options=["Launch Dashboard", "Upcoming Launches", "NOTAM Parser", "Launch Database"],
+    options=["Launch Dashboard", "Upcoming Launches", "Launch Database"],
+    icons=["bi bi-bar-chart-fill", "bi bi-rocket-takeoff-fill", "bi bi-filter"],
     menu_icon="cast",
     default_index=0,
     orientation="horizontal",
@@ -1279,7 +1280,7 @@ if st.session_state.selected == "Launch Dashboard":
         st.rerun()
     
     if df.empty or len(df) == 0:
-        st.info("No launches in the database yet. Go to the NOTAM Parser tab and submit some launches to get started!")
+        st.info("No launches in the database yet.")
     else:
         st.markdown("""
         <style>
@@ -2782,326 +2783,326 @@ elif st.session_state.selected == "Upcoming Launches":
 
 #====================== TAB ROUTING ======================
 
-elif st.session_state.selected == "NOTAM Parser":
-    #st.title("NOTAM Parser")
-    st.subheader("Rocket Launch Drop Zone Map")
-    st.caption("Updates automatically as you edit drop zones, launch info, or upload NOTAM PDFs")
+# elif st.session_state.selected == "NOTAM Parser":
+#     #st.title("NOTAM Parser")
+#     st.subheader("Rocket Launch Drop Zone Map")
+#     st.caption("Updates automatically as you edit drop zones, launch info, or upload NOTAM PDFs")
     
-    dropzones_preview = {
-        f"DZ{i}": {
-            "vertices": st.session_state.dz_vertices[f"DZ{i}"].copy(),
-            "debris": st.session_state.dz_debris[f"DZ{i}"].copy()
-        }
-        for i in range(1, 5)
-    }
+#     dropzones_preview = {
+#         f"DZ{i}": {
+#             "vertices": st.session_state.dz_vertices[f"DZ{i}"].copy(),
+#             "debris": st.session_state.dz_debris[f"DZ{i}"].copy()
+#         }
+#         for i in range(1, 5)
+#     }
     
-    live_map = create_folium_map(
-        st.session_state.get("launch_site", "Select..."),
-        dropzones_preview,
-        st.session_state.shape_dir
-    )
+#     live_map = create_folium_map(
+#         st.session_state.get("launch_site", "Select..."),
+#         dropzones_preview,
+#         st.session_state.shape_dir
+#     )
 
-    col1, col2, col3 = st.columns([0.5, 8, 0.5])
+#     col1, col2, col3 = st.columns([0.5, 8, 0.5])
 
-    with col2:
-        st_folium(
-            live_map,
-            width="100%",
-            height=680,
-            returned_objects=[],
-            key="live_map_preview"
-        )
+#     with col2:
+#         st_folium(
+#             live_map,
+#             width="100%",
+#             height=680,
+#             returned_objects=[],
+#             key="live_map_preview"
+#         )
 
-    launch_sites = ["Select...", "Hainan International Commercial Launch Center", "Jiuquan Satellite Launch Center",
-                    "Wenchang Space Launch Site", "Xichang Satellite Launch Center",
-                    "Naro Space Center", "Sohae Satellite Launching Station", "Unchinoura Space Center", "Yellow Sea Launch Area",
-                    "East China Sea Launch Area", "Taiyuan Satellite Launch Center",
-                    "Other"]
-    countries = ["Select...", "People's Republic of China", "Japan",
-                 "Democratic People's Republic of Korea", "Republic of Korea"]
-    if st.session_state.get("pending_notam_fill"):
-        fill = st.session_state.pending_notam_fill
-        if fill.get("start_time"): st.session_state.start_time = fill["start_time"]
-        if fill.get("end_time"): st.session_state.end_time = fill["end_time"]
-        st.session_state.pending_notam_fill = None
-    with st.form("rocket_launch_form"):
-        st.subheader("Launch Information")
-        col1, col2, col3 = st.columns([2, 1, 1])
-        with col1: st.text_input("Mission Name", placeholder="SLV-XX", key="mission")
-        with col2: st.selectbox("Launch Site", launch_sites, key="launch_site")
-        with col3: st.selectbox("Country", countries, key="launch_country")
-        col4, col5, col6 = st.columns([1, 1, 1])
-        with col4: st.date_input("Launch Date", value=date.today(), key="launch_date")
-        with col5: st.text_input("Window Start (HHMM)", placeholder="0745", key="start_time")
-        with col6: st.text_input("Window End (HHMM)", placeholder="0810", key="end_time")
-        submitted = st.form_submit_button("🚀 Submit – Generate Files (ZIP + Excel + CSV) & Log to Google Sheets",
-                                          type="primary", use_container_width=True)
-    st.subheader("Import Drop Zones from FAA NOTAM PDF(s)")
-    st.caption("**Each PDF = one drop zone** (1st PDF → DZ1, 2nd → DZ2, etc.)")
-    uploaded_pdfs = st.file_uploader("Upload NOTAM PDF file(s)", type="pdf", accept_multiple_files=True, key="notam_uploader")
-    if uploaded_pdfs:
-        st.info(f"📌 {len(uploaded_pdfs)} PDF(s) selected")
-        if st.button("🔄 Parse NOTAMs & Auto-fill Drop Zones", type="primary", use_container_width=True):
-            processed = 0
-            overall_start = ""
-            overall_end = ""
-            for pdf_idx, pdf_file in enumerate(uploaded_pdfs):
-                coord_strings, meta = extract_notam_data(pdf_file)
-                if pdf_idx == 0: overall_start = meta.get("b_time", "")
-                overall_end = meta.get("c_time", "")
-                if processed < 4 and coord_strings and len(coord_strings) >= 3:
-                    dz_key = f"DZ{processed + 1}"
-                    st.session_state.dz_vertices[dz_key] = coord_strings[:]
-                    for idx, val in enumerate(coord_strings):
-                        st.session_state[f"{dz_key}_vert_{idx}"] = val
-                    processed += 1
-            if overall_start or overall_end or processed > 0:
-                st.session_state.pending_notam_fill = {"start_time": overall_start, "end_time": overall_end}
-                st.success(f"✅ Done! Start = **{overall_start or '—'}** | End = **{overall_end or '—'}** | Drop Zones filled: {processed}")
-                st.rerun()
-    st.subheader("Drop Zones DZ1–DZ4")
-    for i in range(1, 5):
-        dz = f"DZ{i}"
-        with st.expander(f"**Drop Zone {i}**", expanded=(i == 1)):
-            st.caption("**Vertices** (min 3 recommended)")
-            current_verts = st.session_state.dz_vertices[dz]
-            for idx in range(len(current_verts)):
-                st.text_input(label=f"Vertex {idx+1}", value=current_verts[idx], key=f"{dz}_vert_{idx}", placeholder="193600N 1183100E")
-            col_add, col_rem, _ = st.columns([1, 1, 4])
-            with col_add:
-                if st.button("➕ Add Vertex", key=f"add_v_{dz}", use_container_width=True):
-                    if len(current_verts) < 10:
-                        st.session_state.dz_vertices[dz].append("")
-                        st.rerun()
-            with col_rem:
-                if len(current_verts) > 3 and st.button("➖ Remove Last", key=f"rem_v_{dz}", use_container_width=True):
-                    st.session_state.dz_vertices[dz].pop()
-                    st.rerun()
-            st.caption("**Debris Points** (min 2, max 4)")
-            current_deb = st.session_state.dz_debris[dz]
-            for idx in range(len(current_deb)):
-                st.text_input(label=f"Debris {idx+1}", value=current_deb[idx], key=f"{dz}_deb_{idx}", placeholder="14.5N 120.5E")
-            col_add_d, col_rem_d, _ = st.columns([1, 1, 4])
-            with col_add_d:
-                if st.button("➕ Add Debris", key=f"add_d_{dz}", use_container_width=True):
-                    if len(current_deb) < 4:
-                        st.session_state.dz_debris[dz].append("")
-                        st.rerun()
-            with col_rem_d:
-                if len(current_deb) > 2 and st.button("➖ Remove Last", key=f"rem_d_{dz}", use_container_width=True):
-                    removed_idx = len(st.session_state.dz_debris[dz]) - 1
-                    stale_key = f"{dz}_deb_{removed_idx}"
-                    if stale_key in st.session_state: del st.session_state[stale_key]
-                    st.session_state.dz_debris[dz].pop()
-                    st.rerun()
-    # ====================== FILE GENERATION + GOOGLE SHEETS LOGGING ======================
-    if submitted:
-        window_utc = format_window(st.session_state.start_time, st.session_state.end_time)
-        if window_utc is None:
-            st.error("❌ Invalid time window. Use HHMM format (e.g. 0745)")
-            st.stop()
-        dropzones = {}
-        for i in range(1, 5):
-            dz_key = f"DZ{i}"
-            dropzones[dz_key] = {"vertices": st.session_state.dz_vertices[dz_key].copy(), "debris": st.session_state.dz_debris[dz_key].copy()}
-        for dz_id, dz in dropzones.items():
-            valid_verts = [p.strip() for p in dz["vertices"] if p.strip()]
-            if len(valid_verts) < 3 and any(p.strip() for p in dz["vertices"]):
-                st.error(f"❌ {dz_id} needs at least 3 valid vertices")
-                st.stop()
-        window_phst = utc_window_to_phst(window_utc)
+#     launch_sites = ["Select...", "Hainan International Commercial Launch Center", "Jiuquan Satellite Launch Center",
+#                     "Wenchang Space Launch Site", "Xichang Satellite Launch Center",
+#                     "Naro Space Center", "Sohae Satellite Launching Station", "Unchinoura Space Center", "Yellow Sea Launch Area",
+#                     "East China Sea Launch Area", "Taiyuan Satellite Launch Center",
+#                     "Other"]
+#     countries = ["Select...", "People's Republic of China", "Japan",
+#                  "Democratic People's Republic of Korea", "Republic of Korea"]
+#     if st.session_state.get("pending_notam_fill"):
+#         fill = st.session_state.pending_notam_fill
+#         if fill.get("start_time"): st.session_state.start_time = fill["start_time"]
+#         if fill.get("end_time"): st.session_state.end_time = fill["end_time"]
+#         st.session_state.pending_notam_fill = None
+#     with st.form("rocket_launch_form"):
+#         st.subheader("Launch Information")
+#         col1, col2, col3 = st.columns([2, 1, 1])
+#         with col1: st.text_input("Mission Name", placeholder="SLV-XX", key="mission")
+#         with col2: st.selectbox("Launch Site", launch_sites, key="launch_site")
+#         with col3: st.selectbox("Country", countries, key="launch_country")
+#         col4, col5, col6 = st.columns([1, 1, 1])
+#         with col4: st.date_input("Launch Date", value=date.today(), key="launch_date")
+#         with col5: st.text_input("Window Start (HHMM)", placeholder="0745", key="start_time")
+#         with col6: st.text_input("Window End (HHMM)", placeholder="0810", key="end_time")
+#         submitted = st.form_submit_button("🚀 Submit – Generate Files (ZIP + Excel + CSV) & Log to Google Sheets",
+#                                           type="primary", use_container_width=True)
+#     st.subheader("Import Drop Zones from FAA NOTAM PDF(s)")
+#     st.caption("**Each PDF = one drop zone** (1st PDF → DZ1, 2nd → DZ2, etc.)")
+#     uploaded_pdfs = st.file_uploader("Upload NOTAM PDF file(s)", type="pdf", accept_multiple_files=True, key="notam_uploader")
+#     if uploaded_pdfs:
+#         st.info(f"📌 {len(uploaded_pdfs)} PDF(s) selected")
+#         if st.button("🔄 Parse NOTAMs & Auto-fill Drop Zones", type="primary", use_container_width=True):
+#             processed = 0
+#             overall_start = ""
+#             overall_end = ""
+#             for pdf_idx, pdf_file in enumerate(uploaded_pdfs):
+#                 coord_strings, meta = extract_notam_data(pdf_file)
+#                 if pdf_idx == 0: overall_start = meta.get("b_time", "")
+#                 overall_end = meta.get("c_time", "")
+#                 if processed < 4 and coord_strings and len(coord_strings) >= 3:
+#                     dz_key = f"DZ{processed + 1}"
+#                     st.session_state.dz_vertices[dz_key] = coord_strings[:]
+#                     for idx, val in enumerate(coord_strings):
+#                         st.session_state[f"{dz_key}_vert_{idx}"] = val
+#                     processed += 1
+#             if overall_start or overall_end or processed > 0:
+#                 st.session_state.pending_notam_fill = {"start_time": overall_start, "end_time": overall_end}
+#                 st.success(f"✅ Done! Start = **{overall_start or '—'}** | End = **{overall_end or '—'}** | Drop Zones filled: {processed}")
+#                 st.rerun()
+#     st.subheader("Drop Zones DZ1–DZ4")
+#     for i in range(1, 5):
+#         dz = f"DZ{i}"
+#         with st.expander(f"**Drop Zone {i}**", expanded=(i == 1)):
+#             st.caption("**Vertices** (min 3 recommended)")
+#             current_verts = st.session_state.dz_vertices[dz]
+#             for idx in range(len(current_verts)):
+#                 st.text_input(label=f"Vertex {idx+1}", value=current_verts[idx], key=f"{dz}_vert_{idx}", placeholder="193600N 1183100E")
+#             col_add, col_rem, _ = st.columns([1, 1, 4])
+#             with col_add:
+#                 if st.button("➕ Add Vertex", key=f"add_v_{dz}", use_container_width=True):
+#                     if len(current_verts) < 10:
+#                         st.session_state.dz_vertices[dz].append("")
+#                         st.rerun()
+#             with col_rem:
+#                 if len(current_verts) > 3 and st.button("➖ Remove Last", key=f"rem_v_{dz}", use_container_width=True):
+#                     st.session_state.dz_vertices[dz].pop()
+#                     st.rerun()
+#             st.caption("**Debris Points** (min 2, max 4)")
+#             current_deb = st.session_state.dz_debris[dz]
+#             for idx in range(len(current_deb)):
+#                 st.text_input(label=f"Debris {idx+1}", value=current_deb[idx], key=f"{dz}_deb_{idx}", placeholder="14.5N 120.5E")
+#             col_add_d, col_rem_d, _ = st.columns([1, 1, 4])
+#             with col_add_d:
+#                 if st.button("➕ Add Debris", key=f"add_d_{dz}", use_container_width=True):
+#                     if len(current_deb) < 4:
+#                         st.session_state.dz_debris[dz].append("")
+#                         st.rerun()
+#             with col_rem_d:
+#                 if len(current_deb) > 2 and st.button("➖ Remove Last", key=f"rem_d_{dz}", use_container_width=True):
+#                     removed_idx = len(st.session_state.dz_debris[dz]) - 1
+#                     stale_key = f"{dz}_deb_{removed_idx}"
+#                     if stale_key in st.session_state: del st.session_state[stale_key]
+#                     st.session_state.dz_debris[dz].pop()
+#                     st.rerun()
+#     # ====================== FILE GENERATION + GOOGLE SHEETS LOGGING ======================
+#     if submitted:
+#         window_utc = format_window(st.session_state.start_time, st.session_state.end_time)
+#         if window_utc is None:
+#             st.error("❌ Invalid time window. Use HHMM format (e.g. 0745)")
+#             st.stop()
+#         dropzones = {}
+#         for i in range(1, 5):
+#             dz_key = f"DZ{i}"
+#             dropzones[dz_key] = {"vertices": st.session_state.dz_vertices[dz_key].copy(), "debris": st.session_state.dz_debris[dz_key].copy()}
+#         for dz_id, dz in dropzones.items():
+#             valid_verts = [p.strip() for p in dz["vertices"] if p.strip()]
+#             if len(valid_verts) < 3 and any(p.strip() for p in dz["vertices"]):
+#                 st.error(f"❌ {dz_id} needs at least 3 valid vertices")
+#                 st.stop()
+#         window_phst = utc_window_to_phst(window_utc)
        
-        dz_compact = []
-        for i in range(1, 5):
-            verts = dropzones[f"DZ{i}"]["vertices"]
-            compact_verts = [convert_to_compact(c) for c in verts]
-            compact_verts += [""] * (8 - len(compact_verts))
-            dz_compact.append(compact_verts[:8])
-        deb_compact = []
-        for i in range(1, 5):
-            comp = [convert_to_compact(c) for c in dropzones[f"DZ{i}"]["debris"]]
-            comp += [""] * (4 - len(comp))
-            deb_compact.append(comp)
-        date_str = st.session_state.launch_date.strftime("%m%d%y")
-        formatted_date = f"{st.session_state.launch_date.month}/{st.session_state.launch_date.day}/{st.session_state.launch_date.year}"
-        mission_str = st.session_state.mission.replace(" ", "") or "N/A"
-        wkt_string = coordinates_to_wkt()
-        dz_count, arch_count, eez_count, fir_count, outside_count = classify_single_launch_dropzones(
-            st.session_state.shape_dir
-        )
-        row_base = {
-            "ROCKET NAME": st.session_state.mission,
-            "LAUNCHING STATE": st.session_state.launch_country,
-            "LAUNCH CENTER": st.session_state.launch_site,
-            "LAUNCH CENTER LOCATION": "",
-            "START TO END TIME": window_phst,
-            "DATE RECEIVED FROM CAAP": "",
-            "WKT": wkt_string,
-            "DZ_COUNT": int(dz_count),
-            "ARCH_COUNT": int(arch_count),
-            "EEZ_COUNT": int(eez_count),
-            "FIR_COUNT": int(fir_count),
-            "OUTSIDE_COUNT": int(outside_count),
-        }
-        for i in range(4):
-            for j in range(8):
-                row_base[f"DZ{i+1} P{j+1}"] = dz_compact[i][j]
-        for i in range(4):
-            for j in range(4):
-                row_base[f"DEB{i+1} P{j+1}"] = deb_compact[i][j]
-        info_df = pd.DataFrame([{"LAUNCH DATE": formatted_date, **row_base}])
-        # =====================================================
-        # BUILD DZ + DEBRIS DATAFRAMES
-        # =====================================================
-        vertices_rows = []
-        debris_rows = []
+#         dz_compact = []
+#         for i in range(1, 5):
+#             verts = dropzones[f"DZ{i}"]["vertices"]
+#             compact_verts = [convert_to_compact(c) for c in verts]
+#             compact_verts += [""] * (8 - len(compact_verts))
+#             dz_compact.append(compact_verts[:8])
+#         deb_compact = []
+#         for i in range(1, 5):
+#             comp = [convert_to_compact(c) for c in dropzones[f"DZ{i}"]["debris"]]
+#             comp += [""] * (4 - len(comp))
+#             deb_compact.append(comp)
+#         date_str = st.session_state.launch_date.strftime("%m%d%y")
+#         formatted_date = f"{st.session_state.launch_date.month}/{st.session_state.launch_date.day}/{st.session_state.launch_date.year}"
+#         mission_str = st.session_state.mission.replace(" ", "") or "N/A"
+#         wkt_string = coordinates_to_wkt()
+#         dz_count, arch_count, eez_count, fir_count, outside_count = classify_single_launch_dropzones(
+#             st.session_state.shape_dir
+#         )
+#         row_base = {
+#             "ROCKET NAME": st.session_state.mission,
+#             "LAUNCHING STATE": st.session_state.launch_country,
+#             "LAUNCH CENTER": st.session_state.launch_site,
+#             "LAUNCH CENTER LOCATION": "",
+#             "START TO END TIME": window_phst,
+#             "DATE RECEIVED FROM CAAP": "",
+#             "WKT": wkt_string,
+#             "DZ_COUNT": int(dz_count),
+#             "ARCH_COUNT": int(arch_count),
+#             "EEZ_COUNT": int(eez_count),
+#             "FIR_COUNT": int(fir_count),
+#             "OUTSIDE_COUNT": int(outside_count),
+#         }
+#         for i in range(4):
+#             for j in range(8):
+#                 row_base[f"DZ{i+1} P{j+1}"] = dz_compact[i][j]
+#         for i in range(4):
+#             for j in range(4):
+#                 row_base[f"DEB{i+1} P{j+1}"] = deb_compact[i][j]
+#         info_df = pd.DataFrame([{"LAUNCH DATE": formatted_date, **row_base}])
+#         # =====================================================
+#         # BUILD DZ + DEBRIS DATAFRAMES
+#         # =====================================================
+#         vertices_rows = []
+#         debris_rows = []
 
-        for i in range(1, 5):
+#         for i in range(1, 5):
 
-            dz = dropzones[f"DZ{i}"]
+#             dz = dropzones[f"DZ{i}"]
 
-            # -------------------------
-            # DZ VERTICES
-            # -------------------------
-            for vi, coord in enumerate(dz["vertices"]):
+#             # -------------------------
+#             # DZ VERTICES
+#             # -------------------------
+#             for vi, coord in enumerate(dz["vertices"]):
 
-                lat, lon = parse_coordinates(coord)
+#                 lat, lon = parse_coordinates(coord)
 
-                if lat is not None and lon is not None:
-                    vertices_rows.append({
-                        "DZ_ID": f"DZ{i}",
-                        "VERTEX_ID": vi + 1,
-                        "LAT": lat,
-                        "LON": lon
-                    })
+#                 if lat is not None and lon is not None:
+#                     vertices_rows.append({
+#                         "DZ_ID": f"DZ{i}",
+#                         "VERTEX_ID": vi + 1,
+#                         "LAT": lat,
+#                         "LON": lon
+#                     })
 
-            # -------------------------
-            # DEBRIS POINTS
-            # -------------------------
-            for di, coord in enumerate(dz["debris"]):
+#             # -------------------------
+#             # DEBRIS POINTS
+#             # -------------------------
+#             for di, coord in enumerate(dz["debris"]):
 
-                lat, lon = parse_coordinates(coord)
+#                 lat, lon = parse_coordinates(coord)
 
-                if lat is not None and lon is not None:
-                    debris_rows.append({
-                        "DZ_ID": f"DZ{i}",
-                        "DB_ID": di + 1,
-                        "LAT": lat,
-                        "LON": lon
-                    })
+#                 if lat is not None and lon is not None:
+#                     debris_rows.append({
+#                         "DZ_ID": f"DZ{i}",
+#                         "DB_ID": di + 1,
+#                         "LAT": lat,
+#                         "LON": lon
+#                     })
 
-        vertices_df = pd.DataFrame(vertices_rows)
-        debris_df = pd.DataFrame(debris_rows)
+#         vertices_df = pd.DataFrame(vertices_rows)
+#         debris_df = pd.DataFrame(debris_rows)
 
-        # ==================== LOG TO GOOGLE SHEETS ====================
-        try:
-            ws = get_launch_worksheet()
-            headers = ws.row_values(1)
+#         # ==================== LOG TO GOOGLE SHEETS ====================
+#         try:
+#             ws = get_launch_worksheet()
+#             headers = ws.row_values(1)
 
-            # row_to_append = [
-            #     info_df.iloc[0].get(col, "")
-            #     for col in headers
-            # ]
+#             # row_to_append = [
+#             #     info_df.iloc[0].get(col, "")
+#             #     for col in headers
+#             # ]
 
-            row_to_append = [
-                str(info_df.iloc[0].get(col, "")) if col not in ["DZ_COUNT","ARCH_COUNT","EEZ_COUNT","FIR_COUNT","OUTSIDE_COUNT"] 
-                else int(info_df.iloc[0].get(col, 0)) 
-                for col in headers
-            ]
+#             row_to_append = [
+#                 str(info_df.iloc[0].get(col, "")) if col not in ["DZ_COUNT","ARCH_COUNT","EEZ_COUNT","FIR_COUNT","OUTSIDE_COUNT"] 
+#                 else int(info_df.iloc[0].get(col, 0)) 
+#                 for col in headers
+#             ]
         
-            ws.append_row(row_to_append, value_input_option="USER_ENTERED")
+#             ws.append_row(row_to_append, value_input_option="USER_ENTERED")
 
-            # ws.append_row(
-            #     row_to_append,
-            #     value_input_option="USER_ENTERED"
-            # )
+#             # ws.append_row(
+#             #     row_to_append,
+#             #     value_input_option="USER_ENTERED"
+#             # )
 
-            st.success(
-                "✅ Launch successfully logged to "
-                "**Google Sheets** "
-                "(Rocket-Launch-Monitoring → Sheet1)"
-            )
+#             st.success(
+#                 "✅ Launch successfully logged to "
+#                 "**Google Sheets** "
+#                 "(Rocket-Launch-Monitoring → Sheet1)"
+#             )
 
-        except Exception as e:
-            st.error(f"⚠️ Could not log to Google Sheets: {e}")
+#         except Exception as e:
+#             st.error(f"⚠️ Could not log to Google Sheets: {e}")
 
-        # ====================== GENERATE ZIP FILES ======================
-        zip_buffer = io.BytesIO()
+#         # ====================== GENERATE ZIP FILES ======================
+#         zip_buffer = io.BytesIO()
 
-        with zipfile.ZipFile(
-            zip_buffer,
-            "w",
-            zipfile.ZIP_DEFLATED
-        ) as zf:
+#         with zipfile.ZipFile(
+#             zip_buffer,
+#             "w",
+#             zipfile.ZIP_DEFLATED
+#         ) as zf:
 
-            # -------------------------------------------------
-            # MAIN INFO CSV
-            # -------------------------------------------------
-            zf.writestr(
-                f"Info_{date_str}.csv",
-                info_df.to_csv(index=False).encode("utf-8")
-            )
+#             # -------------------------------------------------
+#             # MAIN INFO CSV
+#             # -------------------------------------------------
+#             zf.writestr(
+#                 f"Info_{date_str}.csv",
+#                 info_df.to_csv(index=False).encode("utf-8")
+#             )
 
-            # -------------------------------------------------
-            # DZ VERTICES CSV
-            # -------------------------------------------------
-            zf.writestr(
-                f"DZ_{date_str}.csv",
-                vertices_df.to_csv(index=False).encode("utf-8")
-            )
+#             # -------------------------------------------------
+#             # DZ VERTICES CSV
+#             # -------------------------------------------------
+#             zf.writestr(
+#                 f"DZ_{date_str}.csv",
+#                 vertices_df.to_csv(index=False).encode("utf-8")
+#             )
 
-            # -------------------------------------------------
-            # DEBRIS CSV
-            # -------------------------------------------------
-            zf.writestr(
-                f"Deb_{date_str}.csv",
-                debris_df.to_csv(index=False).encode("utf-8")
-            )
+#             # -------------------------------------------------
+#             # DEBRIS CSV
+#             # -------------------------------------------------
+#             zf.writestr(
+#                 f"Deb_{date_str}.csv",
+#                 debris_df.to_csv(index=False).encode("utf-8")
+#             )
 
-            # -------------------------------------------------
-            # XLSX FILE
-            # -------------------------------------------------
-            xlsx_buf = io.BytesIO()
+#             # -------------------------------------------------
+#             # XLSX FILE
+#             # -------------------------------------------------
+#             xlsx_buf = io.BytesIO()
 
-            with pd.ExcelWriter(
-                xlsx_buf,
-                engine="openpyxl"
-            ) as writer:
+#             with pd.ExcelWriter(
+#                 xlsx_buf,
+#                 engine="openpyxl"
+#             ) as writer:
 
-                info_df.to_excel(
-                    writer,
-                    sheet_name="Launch_Info",
-                    index=False
-                )
+#                 info_df.to_excel(
+#                     writer,
+#                     sheet_name="Launch_Info",
+#                     index=False
+#                 )
 
-                vertices_df.to_excel(
-                    writer,
-                    sheet_name="Dropzone_Vertices",
-                    index=False
-                )
+#                 vertices_df.to_excel(
+#                     writer,
+#                     sheet_name="Dropzone_Vertices",
+#                     index=False
+#                 )
 
-                debris_df.to_excel(
-                    writer,
-                    sheet_name="Debris_Points",
-                    index=False
-                )
+#                 debris_df.to_excel(
+#                     writer,
+#                     sheet_name="Debris_Points",
+#                     index=False
+#                 )
 
-            xlsx_buf.seek(0)
+#             xlsx_buf.seek(0)
 
-            zf.writestr(
-                f"Info_{date_str}.xlsx",
-                xlsx_buf.read()
-            )
+#             zf.writestr(
+#                 f"Info_{date_str}.xlsx",
+#                 xlsx_buf.read()
+#             )
 
-        zip_buffer.seek(0)
+#         zip_buffer.seek(0)
 
-        st.download_button(
-            "📦 Download All Files (ZIP)",
-            data=zip_buffer,
-            file_name=f"PhilSA_{mission_str}_{date_str}.zip",
-            mime="application/zip",
-            use_container_width=True
-        )
+#         st.download_button(
+#             "📦 Download All Files (ZIP)",
+#             data=zip_buffer,
+#             file_name=f"PhilSA_{mission_str}_{date_str}.zip",
+#             mime="application/zip",
+#             use_container_width=True
+#         )
 
 #Launch Database tab latest (09 July 2026)
 # ====================== LAUNCH DATABASE TAB ======================
