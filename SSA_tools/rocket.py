@@ -2282,55 +2282,55 @@ elif st.session_state.selected == "Upcoming Launches":
         selected_row = upcoming_df.iloc[selected_idx]
         original_row_index = selected_row.name  # Used for deletion
 
-        # ====================== DELETE SECTION ======================
-        col_del1, col_del2 = st.columns([1, 4])
-        with col_del1:
-            if st.button("🗑️ Delete This Launch", type="secondary", use_container_width=True):
-                st.session_state["delete_confirm"] = True
-                st.session_state["delete_launch_date"] = selected_row.get('LAUNCH DATE')
-                st.session_state["delete_rocket_name"] = selected_row.get('ROCKET NAME')
-                st.rerun()
+        # # ====================== DELETE SECTION ======================
+        # col_del1, col_del2 = st.columns([1, 4])
+        # with col_del1:
+        #     if st.button("🗑️ Delete This Launch", type="secondary", use_container_width=True):
+        #         st.session_state["delete_confirm"] = True
+        #         st.session_state["delete_launch_date"] = selected_row.get('LAUNCH DATE')
+        #         st.session_state["delete_rocket_name"] = selected_row.get('ROCKET NAME')
+        #         st.rerun()
 
-        if st.session_state.get("delete_confirm"):
-            st.error("⚠️ **Warning:** This will permanently delete the launch from the database.")
-            st.warning("After deletion, go to the **NOTAM Parser** tab to submit the updated version.")
+        # if st.session_state.get("delete_confirm"):
+        #     st.error("⚠️ **Warning:** This will permanently delete the launch from the database.")
+        #     st.warning("After deletion, go to the **NOTAM Parser** tab to submit the updated version.")
             
-            c1, c2 = st.columns(2)
-            with c1:
-                if st.button("✅ Yes, Delete Launch", type="primary"):
-                    try:
-                        ws = get_launch_worksheet()
-                        spreadsheet = ws.spreadsheet
-                        ws = spreadsheet.worksheet(ws.title)
+        #     c1, c2 = st.columns(2)
+        #     with c1:
+        #         if st.button("✅ Yes, Delete Launch", type="primary"):
+        #             try:
+        #                 ws = get_launch_worksheet()
+        #                 spreadsheet = ws.spreadsheet
+        #                 ws = spreadsheet.worksheet(ws.title)
                         
-                        data = ws.get_all_records()
-                        target_row = None
+        #                 data = ws.get_all_records()
+        #                 target_row = None
                         
-                        for idx, row in enumerate(data, start=2):
-                            if (str(row.get('LAUNCH DATE', '')).strip() == str(st.session_state["delete_launch_date"]).strip() and
-                                str(row.get('ROCKET NAME', '')).strip() == str(st.session_state["delete_rocket_name"]).strip()):
-                                target_row = idx
-                                break
+        #                 for idx, row in enumerate(data, start=2):
+        #                     if (str(row.get('LAUNCH DATE', '')).strip() == str(st.session_state["delete_launch_date"]).strip() and
+        #                         str(row.get('ROCKET NAME', '')).strip() == str(st.session_state["delete_rocket_name"]).strip()):
+        #                         target_row = idx
+        #                         break
                         
-                        if target_row is None:
-                            st.error("❌ Could not find the launch in the sheet.")
-                        else:
-                            ws.delete_rows(target_row)
-                            st.success(f"✅ Launch deleted successfully (Row {target_row})!")
+        #                 if target_row is None:
+        #                     st.error("❌ Could not find the launch in the sheet.")
+        #                 else:
+        #                     ws.delete_rows(target_row)
+        #                     st.success(f"✅ Launch deleted successfully (Row {target_row})!")
                             
-                            load_launch_database.clear()
-                            for key in ["delete_confirm", "delete_launch_date", "delete_rocket_name"]:
-                                if key in st.session_state:
-                                    del st.session_state[key]
-                            st.rerun()
-                    except Exception as e:
-                        st.error(f"❌ Delete failed: {str(e)}")
-            with c2:
-                if st.button("❌ Cancel", type="secondary"):
-                    for key in ["delete_confirm", "delete_launch_date", "delete_rocket_name"]:
-                        if key in st.session_state:
-                            del st.session_state[key]
-                    st.rerun()
+        #                     load_launch_database.clear()
+        #                     for key in ["delete_confirm", "delete_launch_date", "delete_rocket_name"]:
+        #                         if key in st.session_state:
+        #                             del st.session_state[key]
+        #                     st.rerun()
+        #             except Exception as e:
+        #                 st.error(f"❌ Delete failed: {str(e)}")
+        #     with c2:
+        #         if st.button("❌ Cancel", type="secondary"):
+        #             for key in ["delete_confirm", "delete_launch_date", "delete_rocket_name"]:
+        #                 if key in st.session_state:
+        #                     del st.session_state[key]
+        #             st.rerun()
 
         # ==================== LEFT SIDE - LAUNCH INFO + DROPZONE ====================
         left_col, right_col = st.columns([1, 3])
