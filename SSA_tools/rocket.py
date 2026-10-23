@@ -3437,19 +3437,98 @@ elif st.session_state.selected == "Launch Database":
             )
 
             # ====================== DROP ZONE MAP LAYOUT ======================
+            # st.markdown("### Drop Zone Map Layout")
+            # st.caption("Paste the Google Drive share link (Anyone with the link) for this launch’s map layout.")
+
+            # current_map_url = str(selected_row.get("MAP_URL", "")).strip()
+            # has_valid_link = current_map_url and current_map_url.lower() not in ["nan", "none", ""]
+
+            # # Initialize edit mode
+            # edit_map_key = f"edit_map_{selected_idx}"
+            # if edit_map_key not in st.session_state:
+            #     st.session_state[edit_map_key] = False
+
+            # if has_valid_link and not st.session_state[edit_map_key]:
+            #     # ----- Link already exists -----
+            #     st.success("Map layout is available for this launch.")
+
+            #     file_id = None
+            #     if "/d/" in current_map_url:
+            #         file_id = current_map_url.split("/d/")[1].split("/")[0]
+            #     elif "id=" in current_map_url:
+            #         file_id = current_map_url.split("id=")[1].split("&")[0]
+
+            #     if file_id:
+            #         view_link = f"https://drive.google.com/file/d/{file_id}/view"
+            #         download_link = f"https://drive.google.com/uc?export=download&id={file_id}"
+
+            #         btn1, btn2 = st.columns(2)
+            #         with btn1:
+            #             st.link_button("🗺️ View Full Map", url=view_link, use_container_width=True)
+            #         with btn2:
+            #             st.link_button("⬇️ Download Map", url=download_link, use_container_width=True)
+            #     else:
+            #         st.warning("Could not extract a valid File ID from the saved link.")
+
+            #     if st.button("✏️ Edit / Change Map Link", use_container_width=True, key=f"edit_map_btn_{selected_idx}"):
+            #         st.session_state[edit_map_key] = True
+            #         st.rerun()
+
+            # else:
+            #     # ----- No link yet OR user clicked Edit -----
+            #     if has_valid_link:
+            #         st.info("You are editing the existing map link.")
+
+            #     new_map_url = st.text_input(
+            #         "Google Drive Share Link",
+            #         value=str(current_map_url) if has_valid_link else "",
+            #         placeholder="https://drive.google.com/file/d/xxxxx/view?usp=sharing",
+            #         key=f"map_url_input_{selected_idx}"
+            #     )
+
+            #     col_save, col_cancel = st.columns(2)
+
+            #     with col_save:
+            #         if st.button("💾 Save Map Link", type="primary", use_container_width=True, key=f"save_map_{selected_idx}"):
+            #             if not new_map_url or not new_map_url.strip():
+            #                 st.error("Please paste a valid Google Drive link.")
+            #             else:
+            #                 try:
+            #                     ws = get_launch_worksheet()
+
+            #                     # Use original index from the dataframe
+            #                     original_index = selected_row.name
+            #                     target_row = int(original_index) + 2
+
+            #                     headers = ws.row_values(1)
+
+            #                     if "MAP_URL" not in headers:
+            #                         ws.update_cell(1, len(headers) + 1, "MAP_URL")
+            #                         headers.append("MAP_URL")
+
+            #                     col_index = headers.index("MAP_URL") + 1
+            #                     ws.update_cell(target_row, col_index, new_map_url.strip())
+
+            #                     st.success(f"✅ Map link saved successfully! (Sheet row {target_row})")
+            #                     st.session_state[edit_map_key] = False
+            #                     load_launch_database.clear()
+            #                     st.rerun()
+
+            #                 except Exception as e:
+            #                     st.error(f"Failed to save map link: {e}")
+
+            #     with col_cancel:
+            #         if has_valid_link and st.button("❌ Cancel Edit", use_container_width=True, key=f"cancel_map_edit_{selected_idx}"):
+            #             st.session_state[edit_map_key] = False
+            #             st.rerun()
+
+            # ====================== DROP ZONE MAP LAYOUT ======================
             st.markdown("### Drop Zone Map Layout")
-            st.caption("Paste the Google Drive share link (Anyone with the link) for this launch’s map layout.")
 
             current_map_url = str(selected_row.get("MAP_URL", "")).strip()
             has_valid_link = current_map_url and current_map_url.lower() not in ["nan", "none", ""]
 
-            # Initialize edit mode
-            edit_map_key = f"edit_map_{selected_idx}"
-            if edit_map_key not in st.session_state:
-                st.session_state[edit_map_key] = False
-
-            if has_valid_link and not st.session_state[edit_map_key]:
-                # ----- Link already exists -----
+            if has_valid_link:
                 st.success("Map layout is available for this launch.")
 
                 file_id = None
@@ -3469,58 +3548,8 @@ elif st.session_state.selected == "Launch Database":
                         st.link_button("⬇️ Download Map", url=download_link, use_container_width=True)
                 else:
                     st.warning("Could not extract a valid File ID from the saved link.")
-
-                if st.button("✏️ Edit / Change Map Link", use_container_width=True, key=f"edit_map_btn_{selected_idx}"):
-                    st.session_state[edit_map_key] = True
-                    st.rerun()
-
             else:
-                # ----- No link yet OR user clicked Edit -----
-                if has_valid_link:
-                    st.info("You are editing the existing map link.")
-
-                new_map_url = st.text_input(
-                    "Google Drive Share Link",
-                    value=str(current_map_url) if has_valid_link else "",
-                    placeholder="https://drive.google.com/file/d/xxxxx/view?usp=sharing",
-                    key=f"map_url_input_{selected_idx}"
-                )
-
-                col_save, col_cancel = st.columns(2)
-
-                with col_save:
-                    if st.button("💾 Save Map Link", type="primary", use_container_width=True, key=f"save_map_{selected_idx}"):
-                        if not new_map_url or not new_map_url.strip():
-                            st.error("Please paste a valid Google Drive link.")
-                        else:
-                            try:
-                                ws = get_launch_worksheet()
-
-                                # Use original index from the dataframe
-                                original_index = selected_row.name
-                                target_row = int(original_index) + 2
-
-                                headers = ws.row_values(1)
-
-                                if "MAP_URL" not in headers:
-                                    ws.update_cell(1, len(headers) + 1, "MAP_URL")
-                                    headers.append("MAP_URL")
-
-                                col_index = headers.index("MAP_URL") + 1
-                                ws.update_cell(target_row, col_index, new_map_url.strip())
-
-                                st.success(f"✅ Map link saved successfully! (Sheet row {target_row})")
-                                st.session_state[edit_map_key] = False
-                                load_launch_database.clear()
-                                st.rerun()
-
-                            except Exception as e:
-                                st.error(f"Failed to save map link: {e}")
-
-                with col_cancel:
-                    if has_valid_link and st.button("❌ Cancel Edit", use_container_width=True, key=f"cancel_map_edit_{selected_idx}"):
-                        st.session_state[edit_map_key] = False
-                        st.rerun()
+                st.info("No QGIS map layout available for this launch.")
 
            # ====================== PHILSA ADVISORY ======================
             # st.markdown("### PhilSA Advisory")
@@ -3579,77 +3608,93 @@ elif st.session_state.selected == "Launch Database":
             #             st.error(f"Failed to save advisory link: {e}")
            
             # ====================== PHILSA ADVISORY ======================
+            # st.markdown("### PhilSA Advisory")
+            # st.caption("Paste the advisory link from the agency website for this launch.")
+
+            # advisory_url = str(selected_row.get("ADVISORY_URL", "")).strip()
+            # has_advisory = advisory_url and advisory_url.lower() not in ["nan", "none", ""]
+
+            # # Initialize edit mode in session state
+            # edit_key = f"edit_advisory_{selected_idx}"
+            # if edit_key not in st.session_state:
+            #     st.session_state[edit_key] = False
+
+            # if has_advisory and not st.session_state[edit_key]:
+            #     # ----- Link already exists -----
+            #     st.success("Advisory link is saved for this launch.")
+                
+            #     st.link_button(
+            #         "📄 View Agency Advisory",
+            #         url=advisory_url,
+            #         use_container_width=True
+            #     )
+
+            #     if st.button("✏️ Edit / Change Advisory Link", use_container_width=True, key=f"edit_btn_{selected_idx}"):
+            #         st.session_state[edit_key] = True
+            #         st.rerun()
+
+            # else:
+            #     # ----- No link yet OR user clicked Edit -----
+            #     if has_advisory:
+            #         st.info("You are editing the existing advisory link.")
+
+            #     new_advisory_url = st.text_input(
+            #         "Advisory URL",
+            #         value=str(advisory_url) if has_advisory else "",
+            #         placeholder="https://philsa.gov.ph/....",
+            #         key=f"advisory_url_input_{selected_idx}"
+            #     )
+
+            #     col_save, col_cancel = st.columns(2)
+
+            #     with col_save:
+            #         if st.button("💾 Save Advisory Link", type="primary", use_container_width=True, key=f"save_advisory_{selected_idx}"):
+            #             if not new_advisory_url or not new_advisory_url.strip():
+            #                 st.error("Please paste a valid advisory link.")
+            #             else:
+            #                 try:
+            #                     ws = get_launch_worksheet()
+
+            #                     original_index = selected_row.name
+            #                     target_row = int(original_index) + 2
+
+            #                     headers = ws.row_values(1)
+
+            #                     if "ADVISORY_URL" not in headers:
+            #                         ws.update_cell(1, len(headers) + 1, "ADVISORY_URL")
+            #                         headers.append("ADVISORY_URL")
+
+            #                     col_index = headers.index("ADVISORY_URL") + 1
+            #                     ws.update_cell(target_row, col_index, new_advisory_url.strip())
+
+            #                     st.success(f"✅ Advisory link saved successfully! (Sheet row {target_row})")
+            #                     st.session_state[edit_key] = False
+            #                     load_launch_database.clear()
+            #                     st.rerun()
+
+            #                 except Exception as e:
+            #                     st.error(f"Failed to save advisory link: {e}")
+
+            #     with col_cancel:
+            #         if has_advisory and st.button("❌ Cancel Edit", use_container_width=True, key=f"cancel_edit_{selected_idx}"):
+            #             st.session_state[edit_key] = False
+            #             st.rerun()
+
+            # ====================== PHILSA ADVISORY ======================
             st.markdown("### PhilSA Advisory")
-            st.caption("Paste the advisory link from the agency website for this launch.")
 
             advisory_url = str(selected_row.get("ADVISORY_URL", "")).strip()
             has_advisory = advisory_url and advisory_url.lower() not in ["nan", "none", ""]
 
-            # Initialize edit mode in session state
-            edit_key = f"edit_advisory_{selected_idx}"
-            if edit_key not in st.session_state:
-                st.session_state[edit_key] = False
-
-            if has_advisory and not st.session_state[edit_key]:
-                # ----- Link already exists -----
-                st.success("Advisory link is saved for this launch.")
-                
+            if has_advisory:
+                st.success("Advisory is available for this launch.")
                 st.link_button(
                     "📄 View Agency Advisory",
                     url=advisory_url,
                     use_container_width=True
                 )
-
-                if st.button("✏️ Edit / Change Advisory Link", use_container_width=True, key=f"edit_btn_{selected_idx}"):
-                    st.session_state[edit_key] = True
-                    st.rerun()
-
             else:
-                # ----- No link yet OR user clicked Edit -----
-                if has_advisory:
-                    st.info("You are editing the existing advisory link.")
-
-                new_advisory_url = st.text_input(
-                    "Advisory URL",
-                    value=str(advisory_url) if has_advisory else "",
-                    placeholder="https://philsa.gov.ph/....",
-                    key=f"advisory_url_input_{selected_idx}"
-                )
-
-                col_save, col_cancel = st.columns(2)
-
-                with col_save:
-                    if st.button("💾 Save Advisory Link", type="primary", use_container_width=True, key=f"save_advisory_{selected_idx}"):
-                        if not new_advisory_url or not new_advisory_url.strip():
-                            st.error("Please paste a valid advisory link.")
-                        else:
-                            try:
-                                ws = get_launch_worksheet()
-
-                                original_index = selected_row.name
-                                target_row = int(original_index) + 2
-
-                                headers = ws.row_values(1)
-
-                                if "ADVISORY_URL" not in headers:
-                                    ws.update_cell(1, len(headers) + 1, "ADVISORY_URL")
-                                    headers.append("ADVISORY_URL")
-
-                                col_index = headers.index("ADVISORY_URL") + 1
-                                ws.update_cell(target_row, col_index, new_advisory_url.strip())
-
-                                st.success(f"✅ Advisory link saved successfully! (Sheet row {target_row})")
-                                st.session_state[edit_key] = False
-                                load_launch_database.clear()
-                                st.rerun()
-
-                            except Exception as e:
-                                st.error(f"Failed to save advisory link: {e}")
-
-                with col_cancel:
-                    if has_advisory and st.button("❌ Cancel Edit", use_container_width=True, key=f"cancel_edit_{selected_idx}"):
-                        st.session_state[edit_key] = False
-                        st.rerun()
+                st.info("No agency advisory available for this launch.")
 
     with tab_query:
         st.subheader("Query Launch Database")
