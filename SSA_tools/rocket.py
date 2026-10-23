@@ -2454,79 +2454,124 @@ elif st.session_state.selected == "Upcoming Launches":
             )
 
             # ====================== QGIS MAP LAYOUT (NEW FEATURE) ======================
-            st.markdown("### Drop Zone Map Layout")
-            st.caption("Paste the Google Drive share link (Anyone with the link) for this launch’s map layout.")
+            # st.markdown("### Drop Zone Map Layout")
+            # st.caption("Paste the Google Drive share link (Anyone with the link) for this launch’s map layout.")
 
-            current_map_url = selected_row.get("MAP_URL", "")
-            if current_map_url and str(current_map_url).strip() and str(current_map_url).lower() not in ["nan", "none", ""]:
-                st.success("A map link is already saved for this launch.")
+            # current_map_url = selected_row.get("MAP_URL", "")
+            # if current_map_url and str(current_map_url).strip() and str(current_map_url).lower() not in ["nan", "none", ""]:
+            #     st.success("A map link is already saved for this launch.")
                 
-                # Show View / Download buttons if link exists
+            #     # Show View / Download buttons if link exists
+            #     file_id = None
+            #     map_url = str(current_map_url).strip()
+            #     if "/d/" in map_url:
+            #         file_id = map_url.split("/d/")[1].split("/")[0]
+            #     elif "id=" in map_url:
+            #         file_id = map_url.split("id=")[1].split("&")[0]
+
+            #     if file_id:
+            #         view_link = f"https://drive.google.com/file/d/{file_id}/view"
+            #         download_link = f"https://drive.google.com/uc?export=download&id={file_id}"
+                    
+            #         btn1, btn2 = st.columns(2)
+            #         with btn1:
+            #             st.link_button("🗺️ View Full Map", url=view_link, use_container_width=True)
+            #         with btn2:
+            #             st.link_button("⬇️ Download Map", url=download_link, use_container_width=True)
+            # else:
+            #     st.info("No map link saved yet for this launch.")
+
+            # new_map_url = st.text_input(
+            #     "Google Drive Share Link",
+            #     value=str(current_map_url) if current_map_url and str(current_map_url).lower() not in ["nan", "none"] else "",
+            #     placeholder="https://drive.google.com/file/d/xxxxx/view?usp=sharing",
+            #     key=f"map_url_input_{selected_idx}"
+            # )
+
+            # ====================== DROP ZONE MAP LAYOUT ======================
+            st.markdown("### Drop Zone Map Layout")
+
+            current_map_url = str(selected_row.get("MAP_URL", "")).strip()
+            has_valid_link = current_map_url and current_map_url.lower() not in ["nan", "none", ""]
+
+            if has_valid_link:
+                st.success("Map layout is available for this launch.")
+
                 file_id = None
-                map_url = str(current_map_url).strip()
-                if "/d/" in map_url:
-                    file_id = map_url.split("/d/")[1].split("/")[0]
-                elif "id=" in map_url:
-                    file_id = map_url.split("id=")[1].split("&")[0]
+                if "/d/" in current_map_url:
+                    file_id = current_map_url.split("/d/")[1].split("/")[0]
+                elif "id=" in current_map_url:
+                    file_id = current_map_url.split("id=")[1].split("&")[0]
 
                 if file_id:
                     view_link = f"https://drive.google.com/file/d/{file_id}/view"
                     download_link = f"https://drive.google.com/uc?export=download&id={file_id}"
-                    
+
                     btn1, btn2 = st.columns(2)
                     with btn1:
                         st.link_button("🗺️ View Full Map", url=view_link, use_container_width=True)
                     with btn2:
                         st.link_button("⬇️ Download Map", url=download_link, use_container_width=True)
-            else:
-                st.info("No map link saved yet for this launch.")
-
-            new_map_url = st.text_input(
-                "Google Drive Share Link",
-                value=str(current_map_url) if current_map_url and str(current_map_url).lower() not in ["nan", "none"] else "",
-                placeholder="https://drive.google.com/file/d/xxxxx/view?usp=sharing",
-                key=f"map_url_input_{selected_idx}"
-            )
-
-            if st.button("💾 Save Map Link", type="primary", use_container_width=True, key=f"save_map_{selected_idx}"):
-                if not new_map_url or not new_map_url.strip():
-                    st.error("Please paste a valid Google Drive link.")
                 else:
-                    try:
-                        ws = get_launch_worksheet()
-                        data = ws.get_all_records()
+                    st.warning("Could not extract a valid File ID from the saved link.")
+            else:
+                st.info("No QGIS map layout available for this launch.")
 
-                        target_row = None
-                        launch_date = str(selected_row.get("LAUNCH DATE", "")).strip()
-                        rocket_name = str(selected_row.get("ROCKET NAME", "")).strip()
+            #st.caption("💡 Make sure the link is set to 'Anyone with the link can view' in Google Drive sharing settings.")
+            # if st.button("💾 Save Map Link", type="primary", use_container_width=True, key=f"save_map_{selected_idx}"):
+            #     if not new_map_url or not new_map_url.strip():
+            #         st.error("Please paste a valid Google Drive link.")
+            #     else:
+            #         try:
+            #             ws = get_launch_worksheet()
+            #             data = ws.get_all_records()
 
-                        for idx, row in enumerate(data, start=2):  # row 1 is header
-                            if (str(row.get("LAUNCH DATE", "")).strip() == launch_date and
-                                str(row.get("ROCKET NAME", "")).strip() == rocket_name):
-                                target_row = idx
-                                break
+            #             target_row = None
+            #             launch_date = str(selected_row.get("LAUNCH DATE", "")).strip()
+            #             rocket_name = str(selected_row.get("ROCKET NAME", "")).strip()
 
-                        if target_row is None:
-                            st.error("Could not find this launch in the Google Sheet.")
-                        else:
-                            headers = ws.row_values(1)
-                            if "MAP_URL" not in headers:
-                                # Automatically add the column if it doesn't exist
-                                ws.update_cell(1, len(headers) + 1, "MAP_URL")
-                                headers.append("MAP_URL")
+            #             for idx, row in enumerate(data, start=2):  # row 1 is header
+            #                 if (str(row.get("LAUNCH DATE", "")).strip() == launch_date and
+            #                     str(row.get("ROCKET NAME", "")).strip() == rocket_name):
+            #                     target_row = idx
+            #                     break
 
-                            col_index = headers.index("MAP_URL") + 1  # 1-based
-                            ws.update_cell(target_row, col_index, new_map_url.strip())
+            #             if target_row is None:
+            #                 st.error("Could not find this launch in the Google Sheet.")
+            #             else:
+            #                 headers = ws.row_values(1)
+            #                 if "MAP_URL" not in headers:
+            #                     # Automatically add the column if it doesn't exist
+            #                     ws.update_cell(1, len(headers) + 1, "MAP_URL")
+            #                     headers.append("MAP_URL")
 
-                            st.success("✅ Map link saved successfully!")
-                            load_launch_database.clear()
-                            st.rerun()
+            #                 col_index = headers.index("MAP_URL") + 1  # 1-based
+            #                 ws.update_cell(target_row, col_index, new_map_url.strip())
 
-                    except Exception as e:
-                        st.error(f"Failed to save map link: {e}")
+            #                 st.success("✅ Map link saved successfully!")
+            #                 load_launch_database.clear()
+            #                 st.rerun()
+
+            #         except Exception as e:
+            #             st.error(f"Failed to save map link: {e}")
+            # ====================== PHILSA ADVISORY ======================
+            st.markdown("### PhilSA Advisory")
+
+            advisory_url = str(selected_row.get("ADVISORY_URL", "")).strip()
+            has_advisory = advisory_url and advisory_url.lower() not in ["nan", "none", ""]
+
+            if has_advisory:
+                st.success("Advisory is available for this launch.")
+                st.link_button(
+                    "📄 View Agency Advisory",
+                    url=advisory_url,
+                    use_container_width=True
+                )
+            else:
+                st.info("No agency advisory available for this launch.")
      
         st.caption(f"Launch **#{selected_idx + 1}** of **{len(upcoming_df)}**")
-        st.info("💡 **To update a launch:** Delete it here, then go to the **NOTAM Parser** tab and submit the corrected version.")
+        #st.info("💡 **To update a launch:** Delete it here, then go to the **NOTAM Parser** tab and submit the corrected version.")
 
 #pseudo for Upcoming Launches Tab
 
