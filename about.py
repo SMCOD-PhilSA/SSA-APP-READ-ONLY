@@ -7,12 +7,20 @@ st.set_page_config(
     layout="wide"
 )
 
+# #---------------- REMOVE TOP PADDING ----------------
+# st.markdown("""
+# <style>
+#     .block-container {
+#         padding-top: 4.8rem !important;
+#     }
+# </style>
+# """, unsafe_allow_html=True)
+
 # ---------------- CUSTOM STYLING ----------------
 st.markdown("""
 <style>
     .block-container {
-        padding-top: 3.8rem !important;
-        padding-bottom: 1.5rem !important;
+        padding-top: 4.8rem !important;
     }
     
     .intro-text {
