@@ -100,7 +100,7 @@ pg = st.navigation(
     {
         "Home": [about, dashboard],
         #"SSA Tools": [ssa_collision, ssa_reenter, ssa_rocket, ssa_weather],
-        "SSA Tools": [ssa_reenter, ssa_rocket, ssa_weather],
+        "SSA Domain": [ssa_reenter, ssa_rocket],
         "Resources": [document, faqs]
     },
     position="top"
