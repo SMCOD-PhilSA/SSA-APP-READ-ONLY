@@ -95,6 +95,20 @@ faqs = st.Page(
     url_path="faqs"
 )
 
+# feedback = st.Page(
+#     "resources/feedback.py",
+#     title="Feedback",
+#     icon=":material/forum:",
+#     url_path="feedback"
+# )
+
+# knowledge = st.Page(
+#     "resources/knowledge.py",
+#     title="Knowledge Base",
+#     icon=":material/menu_book:",
+#     url_path="knowledge"
+# )
+
 # ====================== NAVIGATION ======================
 pg = st.navigation(
     {
