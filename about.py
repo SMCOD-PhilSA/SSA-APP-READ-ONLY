@@ -291,7 +291,6 @@ with col1:
         </div>
         <br><br><br>
         <img src="data:image/png;base64,{img_base64}" alt="Re-entry">
-        <br><br>
     </div>
     """, unsafe_allow_html=True)
 
