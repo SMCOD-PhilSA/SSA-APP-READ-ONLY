@@ -7,15 +7,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# #---------------- REMOVE TOP PADDING ----------------
-# st.markdown("""
-# <style>
-#     .block-container {
-#         padding-top: 4.8rem !important;
-#     }
-# </style>
-# """, unsafe_allow_html=True)
-
 # ---------------- CUSTOM STYLING ----------------
 st.markdown("""
 <style>
@@ -62,12 +53,12 @@ st.markdown("""
         line-height: 1.35;
     }
 
-    /* ===== Info cards (Meaning / Initiatives / Data Sources) ===== */
+    /* ===== Info cards ===== */
     .info-card {
         border-radius: 14px;
         padding: 1.2rem 1.1rem 1.4rem 1.1rem;
         height: 100%;
-        min-height: 420px;               /* forces consistent height */
+        min-height: 420px;
         color: white;
         background: #0b1f3a;
         box-shadow: 0 4px 14px rgba(0,0,0,0.18);
@@ -104,12 +95,13 @@ st.markdown("""
         opacity: 0.92;
         flex-grow: 1;
     }
-    
-/* ===== Domain cards (Re-entry / Rocket Launch) ===== */
+
+    /* ===== Domain cards ===== */
     .domain-card {
         border-radius: 14px;
         padding: 1.6rem 1.4rem;
         height: 100%;
+        min-height: 850px;
         color: white;
         box-shadow: 0 4px 14px rgba(0,0,0,0.18);
         transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -139,6 +131,46 @@ st.markdown("""
         opacity: 0.92;
     }
 
+    /* ===== Bottom KPI Cards (Knowledge / FAQs / Feedback) ===== */
+    .kpi-link {
+        text-decoration: none !important;
+        color: inherit !important;
+    }
+    
+    .kpi-card {
+        border-radius: 14px;
+        padding: 1.6rem 1.3rem;
+        height: 100%;
+        color: white;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+        text-align: center;
+        cursor: pointer;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+    }
+    
+    .kpi-card .material-symbols-outlined {
+        font-size: 2.6rem;
+        margin-bottom: 0.7rem;
+        display: block;
+    }
+    
+    .kpi-title {
+        font-size: 1.25rem;
+        font-weight: 650;
+        margin-bottom: 0.45rem;
+    }
+    
+    .kpi-desc {
+        font-size: 0.92rem;
+        line-height: 1.45;
+        opacity: 0.9;
+    }
+    
     .footer {
         text-align: center;
         color: #888;
@@ -148,9 +180,19 @@ st.markdown("""
         margin-top: 1.5rem;
     }
 </style>
-
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 """, unsafe_allow_html=True)
+
+def kpi_card(icon, title, description, page_path, color):
+    st.markdown(f"""
+    <a href="/{page_path}" target="_self" class="kpi-link">
+        <div class="kpi-card" style="background: {color};">
+            <span class="material-symbols-outlined">{icon}</span>
+            <div class="kpi-title">{title}</div>
+            <div class="kpi-desc">{description}</div>
+        </div>
+    </a>
+    """, unsafe_allow_html=True)
 
 # ---------------- INTRO ----------------
 st.markdown("""
@@ -169,7 +211,7 @@ st.markdown("""
 <div class="kpi-container">
     <div class="kpi-card-top">
         <div class="kpi-label">Operated by</div>
-        <div class="kpi-value-top">Space Mission Control<br>and Operations Division</div>
+        <div class="kpi-value-top">Space Mission Control and Operations Division<br>(SMCOD)</div>
     </div>
     <div class="kpi-card-top">
         <div class="kpi-label">Launched on</div>
@@ -184,10 +226,9 @@ st.markdown("""
 
 st.divider()
 
-# ---------------- MAIN CONTENT ----------------
-st.markdown("<h3 style='text-align: center; margin-bottom: 1.8rem;'>What is the Space Situational Awareness or SSA?</h3>", unsafe_allow_html=True)
+# ---------------- WHAT IS SSA ----------------
+st.markdown("<h3 style='text-align: center; margin-bottom: 1.8rem;'>Space Situational Awareness (SSA)</h3>", unsafe_allow_html=True)
 
-# Image paths
 img_meaning     = "utils/d2-1.jpg"
 img_initiatives = "utils/Advisory-Featured-Image1-1.png"
 img_data        = "utils/d2.jpg"
@@ -214,7 +255,6 @@ info_cards = [
 ]
 
 cols = st.columns(3, gap="large")
-
 for col, card in zip(cols, info_cards):
     with col:
         with open(card["img"], "rb") as f:
@@ -230,51 +270,89 @@ for col, card in zip(cols, info_cards):
 
 st.divider()
 
-# ---------------- DOMAINS ----------------
-st.markdown("<h3 style='text-align: center; margin-bottom: 1.8rem;'>What are the SSA Domains?</h3>", unsafe_allow_html=True)
+# ---------------- SSA DOMAINS ----------------
+st.markdown("<h3 style='text-align: center; margin-bottom: 1.8rem;'>SSA Domains</h3>", unsafe_allow_html=True)
 
-domain_cards = [
-    {
-        "icon": "local_fire_department",
-        "img": "utils/12.png",
-        "title": "Re-entry",
-        "desc": "The process of determining, tracking, analyzing, and communicating the potential re-entry of space objects to assess risks and support preparedness and response activities.",
-        "color": "#0e2a57"
-    },
-    {
-        "icon": "rocket_launch",
-        "img": "utils/DZmap_LM8A_20261025.png",
-        "title": "Rocket Launch",
-        "desc": "The process of identifying and mapping of rocket drop zones, monitoring of launch activities, and dissemination of advisories to enhance public awareness and maritime safety.",
-        "color": "#123a7a"
-    },
+col1, col2 = st.columns(2, gap="large")
+
+# ===== RE-ENTRY =====
+with col1:
+    with open("utils/ZQ_RE-ENTRY.png", "rb") as f:
+        img_base64 = base64.b64encode(f.read()).decode()
+    
+    st.markdown(f"""
+    <a href="/reenter" target="_self" class="kpi-link">
+    <div class="domain-card" style="background: #0e2a57;">
+        <span class="material-symbols-outlined">local_fire_department</span>
+        <div class="domain-title">Re-entry</div>
+        <div class="domain-desc">
+            The process of determining, tracking, analyzing, and communicating the potential re-entry of space objects 
+            to assess risks and support preparedness and response activities.
+        </div>
+        <br><br><br>
+        <img src="data:image/png;base64,{img_base64}" alt="Re-entry">
+    </div>
+    """, unsafe_allow_html=True)
+
+# ===== ROCKET LAUNCH =====
+with col2:
+    with open("utils/DZmap_LM8A_20261025.png", "rb") as f:
+        img_base64 = base64.b64encode(f.read()).decode()
+    
+    st.markdown(f"""
+    <a href="/rocket" target="_self" class="kpi-link">
+    <div class="domain-card" style="background: #123a7a;">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        <div class="domain-title">Rocket Launch</div>
+        <div class="domain-desc">
+            The process of identifying and mapping of rocket drop zones, monitoring of launch activities, 
+            and dissemination of advisories to enhance public awareness and maritime safety.
+        </div>
+        <br>
+        <img src="data:image/png;base64,{img_base64}" alt="Rocket Launch">
+    </div>
+    """, unsafe_allow_html=True)
+
+#st.markdown("<br>", unsafe_allow_html=True)
+st.divider()
+# ---------------- RESOURCES ----------------
+st.markdown("<h3 style='text-align: center; margin-bottom: 1.8rem;'>Resources</h3>", unsafe_allow_html=True)
+kpis = [
+    (
+        "menu_book", 
+        "Knowledge Base", 
+        "Learn about SSA concepts, features, and how to use the dashboard", 
+        "knowledge",
+        "#0b1f3a"
+    ),
+    (
+        "help", 
+        "FAQs", 
+        "Find answers to commonly asked questions about the dashboard", 
+        "faqs",
+        "#0e2a57"
+    ),
+    (
+        "forum", 
+        "More Questions & Feedback", 
+        "Have more questions or suggestions? Reach out to the team", 
+        "feedback",
+        "#123a7a"
+    ),
 ]
 
-domain_cols = st.columns(2, gap="large")
-
-for col, card in zip(domain_cols, domain_cards):
+cols = st.columns(3, gap="large")
+for col, (icon, title, desc, page_path, color) in zip(cols, kpis):
     with col:
-        with open(card["img"], "rb") as f:
-            img_base64 = base64.b64encode(f.read()).decode()
-        
-        st.markdown(f"""
-        <div class="domain-card" style="background: {card['color']};">
-            <span class="material-symbols-outlined">{card['icon']}</span>
-            <div class="domain-title">{card['title']}</div>
-            <div class="domain-desc">{card['desc']}</div><br>
-            <img src="data:image/png;base64,{img_base64}" alt="{card['title']}">
-        </div>
-        """, unsafe_allow_html=True)
-
-#st.divider()
+        kpi_card(icon, title, desc, page_path, color)
 
 # ---------------- FOOTER ----------------
 st.markdown("""
 <div class="footer">
     © 2026 Philippine Space Agency • SSA Dashboard<br>
-    For access, contact us at smcod@philsa.gov.ph<br>
+    For access, contact us at smcod@philsa.gov.ph<br><br>
     <span style="font-size: 0.85rem; opacity: 0.85;">
-        Compiled by the Space Mission Control and Operations Division (SMCOD) of Philippine Space Agency (PhilSA)
+        Compiled by the Space Mission Control and Operations Division (SMCOD) of the Philippine Space Agency (PhilSA)
     </span>
 </div>
 """, unsafe_allow_html=True)

@@ -74,26 +74,26 @@ ssa_reenter = st.Page(
     url_path="reenter"
 )
 
-ssa_weather = st.Page(
-    "SSA_tools/weather.py",
-    title="Space Weather",
-    icon=":material/sunny:",
-    url_path="weather"
-)
+# ssa_weather = st.Page(
+#     "SSA_tools/weather.py",
+#     title="Space Weather",
+#     icon=":material/sunny:",
+#     url_path="weather"
+# )
 
-document = st.Page(
-    "resources/documentation.py",
-    title="Documentation",
-    icon=":material/document_search:",
-    url_path="documentation"
-)
+# document = st.Page(
+#     "resources/documentation.py",
+#     title="Documentation",
+#     icon=":material/document_search:",
+#     url_path="documentation"
+# )
 
-faqs = st.Page(
-    "resources/FAQ.py",
-    title="FAQs",
-    icon=":material/help:",
-    url_path="faqs"
-)
+# faqs = st.Page(
+#     "resources/FAQ.py",
+#     title="FAQs",
+#     icon=":material/help:",
+#     url_path="faqs"
+# )
 
 # feedback = st.Page(
 #     "resources/feedback.py",
@@ -109,13 +109,35 @@ faqs = st.Page(
 #     url_path="knowledge"
 # )
 
+# ---------- Hidden pages (reachable only via KPI cards) ----------
+knowledge = st.Page(
+    "resources/knowledge.py",
+    title="Knowledge Base",
+    icon=":material/menu_book:",
+    url_path="knowledge"          # must match the href in documentation.py
+)
+
+faqs = st.Page(
+    "resources/faq.py",           # or resources/faqs.py — match your real filename
+    title="FAQs",
+    icon=":material/help:",
+    url_path="faqs"
+)
+
+feedback = st.Page(
+    "resources/feedback.py",
+    title="Feedback",
+    icon=":material/forum:",
+    url_path="feedback"
+)
+
 # ====================== NAVIGATION ======================
 pg = st.navigation(
     {
         "Home": [about, dashboard],
         #"SSA Tools": [ssa_collision, ssa_reenter, ssa_rocket, ssa_weather],
         "SSA Domain": [ssa_reenter, ssa_rocket],
-        "Resources": [document, faqs]
+        "Resources": [knowledge, faqs, feedback]
     },
     position="top"
 )
