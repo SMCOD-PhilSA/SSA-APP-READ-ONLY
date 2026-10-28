@@ -300,7 +300,7 @@ with col2:
         img_base64 = base64.b64encode(f.read()).decode()
     
     st.markdown(f"""
-    <a href="/rocket" target="_self" class="kpi-link">
+    <a href="https://philsa-ssa-dashboard.streamlit.app/rocket" target="_self" class="kpi-link">
     <div class="domain-card" style="background: #123a7a;">
         <span class="material-symbols-outlined">rocket_launch</span>
         <div class="domain-title">Rocket Launch</div>

@@ -35,6 +35,12 @@ st.markdown("""
 # Set the active domain when this page loads
 st.session_state["active_domain"] = "rocket"
 
+active = st.session_state.get("active_domain", None)
+
+if active == "rocket":
+    # show re-entry specific UI
+    pass
+
 # # ---------------- HEADER ----------------
 # theme = st.get_option("theme.base")
 
