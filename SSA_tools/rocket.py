@@ -31,6 +31,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
+# Set the active domain when this page loads
+st.session_state["active_domain"] = "rocket"
+
 # # ---------------- HEADER ----------------
 # theme = st.get_option("theme.base")
 
