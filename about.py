@@ -281,7 +281,7 @@ with col1:
         img_base64 = base64.b64encode(f.read()).decode()
     
     st.markdown(f"""
-    <a href="/reenter" target="_self" class="kpi-link">
+    <a href="/reenter" target="_blank" class="kpi-link">
     <div class="domain-card" style="background: #0e2a57;">
         <span class="material-symbols-outlined">local_fire_department</span>
         <div class="domain-title">Re-entry</div>
@@ -300,7 +300,7 @@ with col2:
         img_base64 = base64.b64encode(f.read()).decode()
     
     st.markdown(f"""
-    <a href="/rocket" target="_parent" class="kpi-link">
+    <a href="/rocket" target="_blank class="kpi-link">
     <div class="domain-card" style="background: #123a7a;">
         <span class="material-symbols-outlined">rocket_launch</span>
         <div class="domain-title">Rocket Launch</div>
