@@ -109,7 +109,7 @@ ssa_reenter = st.Page(
 #     url_path="knowledge"
 # )
 
-# ---------- Hidden pages (reachable only via KPI cards) ----------
+
 knowledge = st.Page(
     "resources/knowledge.py",
     title="Knowledge Base",
@@ -117,11 +117,11 @@ knowledge = st.Page(
     url_path="knowledge"          # must match the href in documentation.py
 )
 
-faqs = st.Page(
+faq = st.Page(
     "resources/faq.py",           # or resources/faqs.py — match your real filename
     title="FAQs",
     icon=":material/help:",
-    url_path="faqs"
+    url_path="faq"
 )
 
 feedback = st.Page(
@@ -137,7 +137,7 @@ pg = st.navigation(
         "Home": [about, dashboard],
         #"SSA Tools": [ssa_collision, ssa_reenter, ssa_rocket, ssa_weather],
         "SSA Domain": [ssa_reenter, ssa_rocket],
-        "Resources": [knowledge, faqs, feedback]
+        "Resources": [knowledge, faq, feedback]
     },
     position="top"
 )
