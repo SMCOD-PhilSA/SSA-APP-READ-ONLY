@@ -317,6 +317,18 @@ with col2:
 st.divider()
 # ---------------- RESOURCES ----------------
 st.markdown("<h3 style='text-align: center; margin-bottom: 1.8rem;'>Resources</h3>", unsafe_allow_html=True)
+
+def kpi_card(icon, title, description, page_path, color):
+    st.markdown(f"""
+    <a href="/{page_path}" target="_blank" class="kpi-link">
+        <div class="kpi-card" style="background: {color};">
+            <span class="material-symbols-outlined">{icon}</span>
+            <div class="kpi-title">{title}</div>
+            <div class="kpi-desc">{description}</div>
+        </div>
+    </a>
+    """, unsafe_allow_html=True)
+
 kpis = [
     (
         "menu_book", 
