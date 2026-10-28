@@ -118,7 +118,7 @@ knowledge = st.Page(
 )
 
 faq = st.Page(
-    "resources/faq.py",           # or resources/faqs.py — match your real filename
+    "resources/FAQ.py",           # or resources/faqs.py — match your real filename
     title="FAQs",
     icon=":material/help:",
     url_path="faq"
