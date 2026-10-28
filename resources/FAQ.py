@@ -1,5 +1,10 @@
 import streamlit as st
 
+st.set_page_config(
+    page_title="FAQs",
+    page_icon=":material/menu_book:",
+    layout="wide"
+)
 #---------------- REMOVE TOP PADDING ----------------
 st.markdown("""
 <style>
@@ -8,3 +13,5 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+st.subheader("Frequently Asked Questions (FAQs)")
