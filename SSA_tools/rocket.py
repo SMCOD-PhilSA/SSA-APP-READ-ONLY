@@ -32,15 +32,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# Set the active domain when this page loads
-st.session_state["active_domain"] = "rocket"
-
-active = st.session_state.get("active_domain", None)
-
-if active == "rocket":
-    # show re-entry specific UI
-    pass
-
 # # ---------------- HEADER ----------------
 # theme = st.get_option("theme.base")
 
@@ -86,7 +77,7 @@ if selected_option != st.session_state.selected:
     st.session_state.selected = selected_option
     st.rerun()
 
-st.set_page_config(page_title="SSA - Rocket Launch", page_icon=":material/rocket_launch:",  layout="wide")
+st.set_page_config(page_title="SSA Dashboard - Rocket Launch", page_icon=":material/rocket_launch:",  layout="wide")
 
 # ====================== SAFE PATHS ======================
 if "shape_dir" not in st.session_state:

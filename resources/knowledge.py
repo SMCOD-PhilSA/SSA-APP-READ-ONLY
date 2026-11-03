@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 st.set_page_config(
-    page_title="Documentation - Knowledge Base",
+    page_title="SSA Dashboard - Knowledge Base",
     page_icon=":material/menu_book:",
     layout="wide"
 )
@@ -14,7 +14,16 @@ st.markdown("""
     .block-container {
         padding-top: 4.8rem !important;
     }
-</style>
+
+    .footer {
+        text-align: center;
+        color: #888;
+        padding: 1.25rem 0 0.5rem 0;
+        font-size: 0.9rem;
+        border-top: 1px solid rgba(128,128,128,0.18);
+        margin-top: 1.5rem;
+    }
+    </style>
 """, unsafe_allow_html=True)
 
 # # ---------------- CUSTOM STYLING ----------------
@@ -283,6 +292,9 @@ elif selected_option == "Rocket Launch":
 st.markdown("""
 <div class="footer">
     © 2026 Philippine Space Agency • SSA Dashboard<br>
-    Documentation v0.1
+    For access, contact us at smcod@philsa.gov.ph<br><br>
+    <span style="font-size: 0.85rem; opacity: 0.85;">
+        Compiled by the Space Mission Control and Operations Division (SMCOD) of the Philippine Space Agency (PhilSA)
+    </span>
 </div>
 """, unsafe_allow_html=True)
