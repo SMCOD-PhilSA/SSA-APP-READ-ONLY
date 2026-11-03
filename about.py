@@ -2,7 +2,7 @@ import streamlit as st
 import base64
 
 st.set_page_config(
-    page_title="SSA - About",
+    page_title="SSA Dashboard - About",
     page_icon=":material/info:",
     layout="wide"
 )
