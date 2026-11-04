@@ -1548,7 +1548,7 @@ if st.session_state.selected == "Launch Dashboard":
                         height=420                     # ← Adjusted to fit container
                     )
                     fig_pie.update_traces(
-                        textinfo="percent+label",
+                        textinfo="percent",
                         marker=dict(line=dict(color="white", width=2)),
                         textfont_size=14
                     )
@@ -1658,6 +1658,7 @@ if st.session_state.selected == "Launch Dashboard":
                     x="Period",
                     y="Launch Count",
                     markers=True,
+                    text="Launch Count",
                     template="plotly",
                     height=420
                 )
@@ -1670,8 +1671,10 @@ if st.session_state.selected == "Launch Dashboard":
                 fig_line.update_traces(
                     line=dict(color="#1976d2", width=4),
                     marker=dict(size=10),
-                    fill='tozeroy',
-                    fillcolor='rgba(25,118,210,0.2)'
+                    # fill='tozeroy',
+                    # fillcolor='rgba(25,118,210,0.2)'
+                    textposition="top center",
+                    textfont_size=14
                 )
             
                 fig_line.update_layout(
