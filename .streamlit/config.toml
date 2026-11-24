@@ -14,7 +14,8 @@ secondaryBackgroundColor = "#f0f2f6"
 textColor = "#0e224b"
 
 [theme.light.sidebar]
-backgroundColor = "#f8f9fa"
+backgroundColor = "#0e224b"
+textColor = "#e0e0e0"
 
 # ========================
 # DARK THEME
@@ -26,5 +27,4 @@ secondaryBackgroundColor = "#1e2a44"
 textColor = "#e0e0e0"
 
 [theme.dark.sidebar]
-backgroundColor = "#13213d"
-
+backgroundColor = "#0e224b"
