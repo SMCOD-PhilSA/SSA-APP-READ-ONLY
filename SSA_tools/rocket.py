@@ -1671,8 +1671,8 @@ if st.session_state.selected == "Launch Dashboard":
                 fig_line.update_traces(
                     line=dict(color="#1976d2", width=4),
                     marker=dict(size=10),
-                    # fill='tozeroy',
-                    # fillcolor='rgba(25,118,210,0.2)'
+                    fill='tozeroy',
+                    fillcolor='rgba(25,118,210,0.2)',
                     textposition="top center",
                     textfont_size=14
                 )
@@ -4012,6 +4012,8 @@ elif st.session_state.selected == "Launch Database":
         fig_year.update_traces(
             line=dict(color="#1976d2", width=3),
             marker=dict(size=9),
+            fill='tozeroy',
+            fillcolor='rgba(25,118,210,0.2)',
             textposition="top center",
             textfont_size=14
         )
