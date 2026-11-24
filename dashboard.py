@@ -1875,9 +1875,13 @@ with main_col2:
     st.subheader("Activity")
     with st.container(height=1100, border=True):
    
-        tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "Alerts", "Recent Launches", "Conjunction Events", 
-            "Recent Re-entries", "Space Weather Events"
+        # tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        #     "Alerts", "Recent Launches", "Conjunction Events", 
+        #     "Recent Re-entries", "Space Weather Events"
+        # ])
+
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "Alerts", "Recent Launches", "Recent Re-entries", "Space Weather Events"
         ])
                 
         # ------------------- TAB 1: ALERTS -------------------
@@ -1914,34 +1918,35 @@ with main_col2:
                 site_map = _demo_label_map(launch_alerts["LAUNCH CENTER"], "Site")
                 launch_alerts["Pseudo_Site"] = launch_alerts["LAUNCH CENTER"].map(site_map)
 
-            # === Active Conjunction Alerts ===
-            conjunction_alerts = []
-            active_events = []  # for caption
-            try:
-                raw_conjunction_df = load_database()
-                event_summary = compute_event_summary(raw_conjunction_df, use_persisted_summary=False)
+            # # === Active Conjunction Alerts ===
+            # conjunction_alerts = []
+            # active_events = []  # for caption
+            # try:
+            #     raw_conjunction_df = load_database()
+            #     event_summary = compute_event_summary(raw_conjunction_df, use_persisted_summary=False)
               
-                if not event_summary.empty:
-                    events_df = event_summary.copy()
-                    events_df["TCA_dt"] = pd.to_datetime(events_df["TCA_UTC"], utc=True, errors="coerce")
-                    events_df = events_df.dropna(subset=["TCA_dt"])
+            #     if not event_summary.empty:
+            #         events_df = event_summary.copy()
+            #         events_df["TCA_dt"] = pd.to_datetime(events_df["TCA_UTC"], utc=True, errors="coerce")
+            #         events_df = events_df.dropna(subset=["TCA_dt"])
                   
-                    now = datetime.now(timezone.utc)
-                    active_events = events_df[events_df["TCA_dt"] > now].copy()
+            #         now = datetime.now(timezone.utc)
+            #         active_events = events_df[events_df["TCA_dt"] > now].copy()
                   
-                    if not active_events.empty:
-                        active_events = active_events.sort_values("TCA_dt", ascending=True)
-                        conjunction_alerts = active_events.head(8).copy()
-                        conjunction_alerts = conjunction_alerts.reset_index(drop=True)
-                        if DEMO_MODE:
-                            conjunction_alerts["Pseudo_Event"] = [f"Event {chr(65 + i)}" for i in range(len(conjunction_alerts))]
-                        else:
-                            conjunction_alerts["Pseudo_Event"] = conjunction_alerts["EVENT_ID"]
-            except Exception as e:
-                st.warning("⚠️ Could not load conjunction events.")
+            #         if not active_events.empty:
+            #             active_events = active_events.sort_values("TCA_dt", ascending=True)
+            #             conjunction_alerts = active_events.head(8).copy()
+            #             conjunction_alerts = conjunction_alerts.reset_index(drop=True)
+            #             if DEMO_MODE:
+            #                 conjunction_alerts["Pseudo_Event"] = [f"Event {chr(65 + i)}" for i in range(len(conjunction_alerts))]
+            #             else:
+            #                 conjunction_alerts["Pseudo_Event"] = conjunction_alerts["EVENT_ID"]
+            # except Exception as e:
+            #     st.warning("⚠️ Could not load conjunction events.")
 
             # Display Section
-            if not reentry_alerts and not sw_alerts and len(conjunction_alerts) == 0:
+            #if not reentry_alerts and not sw_alerts and len(conjunction_alerts) == 0:
+            if not reentry_alerts and not sw_alerts == 0:
                 st.success("✅ No critical alerts at the moment.")
                 st.caption("Shows MAJOR re-entries and Storm (Kp≥5) space weather events.")
             else:
@@ -2004,30 +2009,30 @@ with main_col2:
                         </div>
                         """, unsafe_allow_html=True)
 
-                # Conjunction Alerts
-                if len(conjunction_alerts) > 0:
-                    for _, row in conjunction_alerts.iterrows():
-                        risk_label = row.get("RISK", "LOW")
-                        clean_risk = str(risk_label).strip().replace("🔴","").replace("🟠","").replace("🟡","").replace("⚪","").replace("⚫","").strip()
-                        risk_class = clean_risk.lower()
-                        pseudo_event = row.get("Pseudo_Event", "Event Unknown")
-                        tca_ph = str(row.get("TCA_PH", ""))[:16] if row.get("TCA_PH") else "—"
-                        hours = row.get("RT_from_TCA", 0)
-                        hours_str = f"{hours:.1f}h" if hours > 0 else "Soon"
-                        pc = row.get("MAX_PC", 0)
-                        miss = row.get("MIN_MISS", 0)
-                        st.markdown(f"""
-                        <div style="background-color:#1a4fa3;padding:14px;border-radius:10px;
-                                    margin-bottom:12px;color:white;">
-                            <strong>{pseudo_event}</strong><br>
-                            <small>{tca_ph} PhST • <b>{hours_str}</b></small><br>
-                            <small>PC: <b>{pc:.2e}</b> • Miss: <b>{miss:.1f} m</b></small><br>
-                            <span class="risk-btn risk-{risk_class}">{risk_label}</span>
-                            <span class="risk-btn risk-lapsed" style="margin-left:4px;">CONJUNCTION</span>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    if len(active_events) > 8:
-                        st.caption(f"... and {len(active_events)-8} more active conjunctions")
+                # # Conjunction Alerts
+                # if len(conjunction_alerts) > 0:
+                #     for _, row in conjunction_alerts.iterrows():
+                #         risk_label = row.get("RISK", "LOW")
+                #         clean_risk = str(risk_label).strip().replace("🔴","").replace("🟠","").replace("🟡","").replace("⚪","").replace("⚫","").strip()
+                #         risk_class = clean_risk.lower()
+                #         pseudo_event = row.get("Pseudo_Event", "Event Unknown")
+                #         tca_ph = str(row.get("TCA_PH", ""))[:16] if row.get("TCA_PH") else "—"
+                #         hours = row.get("RT_from_TCA", 0)
+                #         hours_str = f"{hours:.1f}h" if hours > 0 else "Soon"
+                #         pc = row.get("MAX_PC", 0)
+                #         miss = row.get("MIN_MISS", 0)
+                #         st.markdown(f"""
+                #         <div style="background-color:#1a4fa3;padding:14px;border-radius:10px;
+                #                     margin-bottom:12px;color:white;">
+                #             <strong>{pseudo_event}</strong><br>
+                #             <small>{tca_ph} PhST • <b>{hours_str}</b></small><br>
+                #             <small>PC: <b>{pc:.2e}</b> • Miss: <b>{miss:.1f} m</b></small><br>
+                #             <span class="risk-btn risk-{risk_class}">{risk_label}</span>
+                #             <span class="risk-btn risk-lapsed" style="margin-left:4px;">CONJUNCTION</span>
+                #         </div>
+                #         """, unsafe_allow_html=True)
+                #     if len(active_events) > 8:
+                #         st.caption(f"... and {len(active_events)-8} more active conjunctions")
 
         # ------------------- TAB 2: RECENT LAUNCHES -------------------
         with tab2:
@@ -2065,57 +2070,58 @@ with main_col2:
             else:
                 st.info("No launch data available yet.")
 
-        # ------------------- TAB 3: CONJUNCTION EVENTS -------------------
-        with tab3:
-            st.markdown("**Conjunction Events**")
-            try:
-                raw_conjunction_df = load_database()
-                event_summary = compute_event_summary(raw_conjunction_df, use_persisted_summary=False)
+        # # ------------------- TAB 3: CONJUNCTION EVENTS -------------------
+        # with tab3:
+        #     st.markdown("**Conjunction Events**")
+        #     try:
+        #         raw_conjunction_df = load_database()
+        #         event_summary = compute_event_summary(raw_conjunction_df, use_persisted_summary=False)
                
-                if event_summary.empty:
-                    st.info("No conjunction events available.")
-                else:
-                    events_df = event_summary.copy()
-                    events_df["TCA_dt"] = pd.to_datetime(events_df["TCA_UTC"], utc=True, errors="coerce")
-                    events_df = events_df.sort_values(by="RT_from_TCA", ascending=False).reset_index(drop=True)
+        #         if event_summary.empty:
+        #             st.info("No conjunction events available.")
+        #         else:
+        #             events_df = event_summary.copy()
+        #             events_df["TCA_dt"] = pd.to_datetime(events_df["TCA_UTC"], utc=True, errors="coerce")
+        #             events_df = events_df.sort_values(by="RT_from_TCA", ascending=False).reset_index(drop=True)
 
-                    if DEMO_MODE:
-                        events_df["Pseudo_Event"] = [f"Event {chr(65 + i)}" for i in range(len(events_df))]
-                    else:
-                        events_df["Pseudo_Event"] = events_df["EVENT_ID"]
+        #             if DEMO_MODE:
+        #                 events_df["Pseudo_Event"] = [f"Event {chr(65 + i)}" for i in range(len(events_df))]
+        #             else:
+        #                 events_df["Pseudo_Event"] = events_df["EVENT_ID"]
                     
-                    displayed = 0
-                    for _, row in events_df.iterrows():
-                        if displayed >= 6: break
-                        risk_label = row.get("RISK", "LOW")
-                        clean_risk = str(risk_label).strip().replace("🔴", "").replace("🟠", "").replace("🟡", "").replace("⚪", "").replace("⚫", "").strip()
-                        risk_class = clean_risk.lower()
+        #             displayed = 0
+        #             for _, row in events_df.iterrows():
+        #                 if displayed >= 6: break
+        #                 risk_label = row.get("RISK", "LOW")
+        #                 clean_risk = str(risk_label).strip().replace("🔴", "").replace("🟠", "").replace("🟡", "").replace("⚪", "").replace("⚫", "").strip()
+        #                 risk_class = clean_risk.lower()
                        
-                        pseudo_event = row.get("Pseudo_Event", "Event Unknown")
-                        tca_ph = str(row.get("TCA_PH", ""))[:16] if row.get("TCA_PH") else "—"
-                        hours = row.get("RT_from_TCA", 0)
-                        hours_str = f"{hours:.1f}h" if hours >= 0 else "Lapsed"
-                        pc = row.get("MAX_PC", 0)
-                        miss = row.get("MIN_MISS", 0)
+        #                 pseudo_event = row.get("Pseudo_Event", "Event Unknown")
+        #                 tca_ph = str(row.get("TCA_PH", ""))[:16] if row.get("TCA_PH") else "—"
+        #                 hours = row.get("RT_from_TCA", 0)
+        #                 hours_str = f"{hours:.1f}h" if hours >= 0 else "Lapsed"
+        #                 pc = row.get("MAX_PC", 0)
+        #                 miss = row.get("MIN_MISS", 0)
                        
-                        st.markdown(f"""
-                        <div style="background-color: #1a4fa3; padding: 14px; border-radius: 10px;
-                                    margin-bottom: 12px; color: white;">
-                            <strong>{pseudo_event}</strong><br>
-                            <small>{tca_ph} PhST • {hours_str}</small><br>
-                            <small>PC: <b>{pc:.2e}</b> • Miss: <b>{miss:.1f} m</b></small><br>
-                            <span class="risk-btn risk-{risk_class}">{risk_label}</span>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        displayed += 1
+        #                 st.markdown(f"""
+        #                 <div style="background-color: #1a4fa3; padding: 14px; border-radius: 10px;
+        #                             margin-bottom: 12px; color: white;">
+        #                     <strong>{pseudo_event}</strong><br>
+        #                     <small>{tca_ph} PhST • {hours_str}</small><br>
+        #                     <small>PC: <b>{pc:.2e}</b> • Miss: <b>{miss:.1f} m</b></small><br>
+        #                     <span class="risk-btn risk-{risk_class}">{risk_label}</span>
+        #                 </div>
+        #                 """, unsafe_allow_html=True)
+        #                 displayed += 1
                        
-                    if len(events_df) > 6:
-                        st.caption(f"... and {len(events_df)-6} more events")
-            except Exception as e:
-                st.warning("⚠️ Could not load conjunction events.")
+        #             if len(events_df) > 6:
+        #                 st.caption(f"... and {len(events_df)-6} more events")
+        #     except Exception as e:
+        #         st.warning("⚠️ Could not load conjunction events.")
 
         # ------------------- TAB 4: RE-ENTRIES -------------------
-        with tab4:
+        #with tab4:
+        with tab3:
             st.markdown("**Re-entry Events — Last 7 Days**")
             if reentry_err:
                 st.warning(f"⚠️ Could not load re-entry data: {reentry_err}")
@@ -2149,7 +2155,8 @@ with main_col2:
                     st.caption(f"... and {len(reentry_events)-8} more objects")
 
         # ------------------- TAB 5: SPACE WEATHER (Unchanged) -------------------
-        with tab5:
+        #with tab5:
+        with tab4:
             st.markdown("**Space Weather Events — Last 7 Days**")
             if not sw_events:
                 st.success("No significant geomagnetic activity in the last 7 days.")
@@ -2194,12 +2201,12 @@ with main_col2:
 st.markdown("---")
 st.subheader("SSA Tools")
 kpis = [
-    ("compare_arrows",        "Conjunction",    "Upload and analyze CDM events",                   "collision", "#0b1f3a"),
+    #("compare_arrows",        "Conjunction",    "Upload and analyze CDM events",                   "collision", "#0b1f3a"),
     ("local_fire_department", "Re-entry",       "Assess and monitor object re-entry events",       "reenter",   "#0e2a57"),
     ("rocket_launch",         "Rocket Launch",  "Track and monitor upcoming and recent launches",  "rocket",    "#123a7a"),
-    ("wb_sunny",              "Space Weather",  "View solar activity and space weather conditions","weather",   "#1a4fa3"),
+    #("wb_sunny",              "Space Weather",  "View solar activity and space weather conditions","weather",   "#1a4fa3"),
 ]
-cols = st.columns(4)
+cols = st.columns(2)
 for col, (icon, title, desc, nav, color) in zip(cols, kpis):
     with col:
         kpi_card(icon, title, desc, "", nav, color)
@@ -2209,14 +2216,14 @@ st.markdown("---")
 st.subheader("Quick Actions")
 
 quick_actions = [
-    ("radar",            "Analyze Close Approach",   "#0b1f3a", "collision"),
-    ("upload_file",      "Upload CDM",               "#0b1f3a", "collision"),
+    #("radar",            "Analyze Close Approach",   "#0b1f3a", "collision"),
+    #("upload_file",      "Upload CDM",               "#0b1f3a", "collision"),
     ("satellite_alt",    "Analyze Re-entry",         "#0e2a57", "reenter?tab=analyzer"),
     ("flight_takeoff",   "Predict Re-entry",         "#0e2a57", "reenter?tab=predictor"),
     ("document_scanner", "NOTAM Parser",             "#123a7a", "rocket"),
     ("rocket_launch",    "See Upcoming Launches",    "#123a7a", "rocket"),
-    ("wb_twilight",      "Predict Auroral Activity", "#1a4fa3", "weather"),
-    ("electric_bolt",    "Assess Potential Outages", "#1a4fa3", "weather"),
+    #("wb_twilight",      "Predict Auroral Activity", "#1a4fa3", "weather"),
+    #("electric_bolt",    "Assess Potential Outages", "#1a4fa3", "weather"),
 ]
 
 for i in range(0, len(quick_actions), 4):
