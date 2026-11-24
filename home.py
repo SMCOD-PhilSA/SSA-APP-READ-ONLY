@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+from auth import require_login, show_user_sidebar
 
 # ====================== FORCE BASE URL ======================
 if "base_url_set" not in st.session_state:
@@ -60,55 +61,12 @@ ssa_rocket = st.Page(
     url_path="rocket"
 )
 
-# ssa_collision = st.Page(
-#     "SSA_tools/collision.py",
-#     title="Conjunction",
-#     icon=":material/compare_arrows:",
-#     url_path="collision"
-# )
-
 ssa_reenter = st.Page(
     "SSA_tools/reenter.py",
     title="Re-entry",
     icon=":material/local_fire_department:",
     url_path="reenter"
 )
-
-# ssa_weather = st.Page(
-#     "SSA_tools/weather.py",
-#     title="Space Weather",
-#     icon=":material/sunny:",
-#     url_path="weather"
-# )
-
-# document = st.Page(
-#     "resources/documentation.py",
-#     title="Documentation",
-#     icon=":material/document_search:",
-#     url_path="documentation"
-# )
-
-# faqs = st.Page(
-#     "resources/FAQ.py",
-#     title="FAQs",
-#     icon=":material/help:",
-#     url_path="faqs"
-# )
-
-# feedback = st.Page(
-#     "resources/feedback.py",
-#     title="Feedback",
-#     icon=":material/forum:",
-#     url_path="feedback"
-# )
-
-# knowledge = st.Page(
-#     "resources/knowledge.py",
-#     title="Knowledge Base",
-#     icon=":material/menu_book:",
-#     url_path="knowledge"
-# )
-
 
 knowledge = st.Page(
     "resources/knowledge.py",
@@ -130,6 +88,11 @@ feedback = st.Page(
     icon=":material/forum:",
     url_path="feedback"
 )
+
+
+# ====================== AUTH ======================
+user_email = require_login()
+show_user_sidebar()
 
 # ====================== NAVIGATION ======================
 pg = st.navigation(
