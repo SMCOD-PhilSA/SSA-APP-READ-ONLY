@@ -25,7 +25,6 @@ In the future, the platform aims to serve researchers, academic institutions, in
 
 ## ✨ Key Features
 
-- **Conjunction Analysis** — Monitor close approaches and collision risks (CDM events)
 - **Re-entry Monitoring** — Track objects predicted to re-enter Earth's atmosphere
 - **Rocket Launch Tracker** — Stay updated with upcoming and recent launches (focus on neighboring countries)
 - **Space Weather** — Real-time geomagnetic storm (Kp Index) forecasts
