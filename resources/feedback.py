@@ -112,49 +112,147 @@ def send_feedback_to_teams(ticket_no, date, name, email, agency, message, status
     return True
 
 # ---------------- PAGE UI ----------------
+# st.markdown("Have questions or suggestions about the SSA Dashboard? Submit a ticket below.")
+
+# with st.form("feedback_form", clear_on_submit=True):
+#     col1, col2 = st.columns(2)
+    
+#     with col1:
+#         name = st.text_input("Name")
+#         email = st.text_input("Email")
+    
+#     with col2:
+#         agency = st.text_input("Agency / Organization")
+    
+#     message = st.text_area("Your question or feedback", height=150)
+    
+#     submitted = st.form_submit_button("Submit Ticket", type="primary")
+    
+#     if submitted:
+#         if not message.strip():
+#             st.warning("Please enter a message before submitting.")
+#         else:
+#             try:
+#                 sheet = connect_to_sheet()
+                
+#                 # Generate ticket number
+#                 ticket_no = get_next_ticket_number(sheet)
+#                 date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+#                 # Ticket | Date | Name | Email | Agency | Message | Urgency | Status
+#                 row = [
+#                     ticket_no,           # Ticket
+#                     date_now,            # Date
+#                     name.strip(),        # Name
+#                     email.strip(),       # Email
+#                     agency.strip(),      # Agency
+#                     message.strip(),     # Message
+#                     "",                  # Urgency (developer field)
+#                     "OPEN"               # Status (default)
+#                 ]
+                
+#                 # 1. Save to Google Sheet
+#                 sheet.append_row(row)
+                
+#                 # 2. Post to Teams
+#                 send_feedback_to_teams(
+#                     ticket_no=ticket_no,
+#                     date=date_now,
+#                     name=name.strip(),
+#                     email=email.strip(),
+#                     agency=agency.strip(),
+#                     message=message.strip(),
+#                     status="OPEN"
+#                 )
+                
+#                 st.success("Ticket submitted successfully!")
+#                 st.info(f"**Your Ticket Number:** `{ticket_no}`")
+#                 st.markdown("SMCOD will reach out to you regarding this ticket.")
+                
+#             except Exception as e:
+#                 st.error(f"Failed to submit ticket. Error: {e}")
+
+# ---------------- PAGE UI ----------------
+# ---------------- PAGE UI ----------------
 st.markdown("Have questions or suggestions about the SSA Dashboard? Submit a ticket below.")
 
-with st.form("feedback_form", clear_on_submit=True):
+# This counter forces the form widgets to reset after successful submit
+if "form_version" not in st.session_state:
+    st.session_state.form_version = 0
+
+with st.form("feedback_form", clear_on_submit=False):
     col1, col2 = st.columns(2)
     
     with col1:
-        name = st.text_input("Name")
-        email = st.text_input("Email")
+        name = st.text_input(
+            "Name *",
+            key=f"name_{st.session_state.form_version}"
+        )
+        email = st.text_input(
+            "Email *",
+            key=f"email_{st.session_state.form_version}"
+        )
     
     with col2:
-        agency = st.text_input("Agency / Organization")
+        agency = st.text_input(
+            "Agency / Organization *",
+            key=f"agency_{st.session_state.form_version}"
+        )
     
-    message = st.text_area("Your question or feedback", height=150)
+    message = st.text_area(
+        "Your question or feedback *",
+        height=150,
+        key=f"message_{st.session_state.form_version}"
+    )
     
     submitted = st.form_submit_button("Submit Ticket", type="primary")
     
     if submitted:
+        # ---------- VALIDATION ----------
+        errors = []
+
+        if not name.strip():
+            errors.append("Name")
+        if not email.strip():
+            errors.append("Email")
+        if not agency.strip():
+            errors.append("Agency / Organization")
         if not message.strip():
-            st.warning("Please enter a message before submitting.")
+            errors.append("Message")
+
+        # Basic email format check
+        if email.strip() and ("@" not in email or "." not in email.split("@")[-1]):
+            errors.append("a valid Email address")
+
+        if errors:
+            if len(errors) == 1:
+                st.warning(f"Please fill in the required field: **{errors[0]}**")
+            else:
+                st.warning(
+                    "Please fill in all required fields:\n\n- " + 
+                    "\n- ".join(errors)
+                )
         else:
+            # ---------- ALL FIELDS OK → SUBMIT ----------
             try:
                 sheet = connect_to_sheet()
                 
-                # Generate ticket number
                 ticket_no = get_next_ticket_number(sheet)
                 date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 
-                # Ticket | Date | Name | Email | Agency | Message | Urgency | Status
                 row = [
-                    ticket_no,           # Ticket
-                    date_now,            # Date
-                    name.strip(),        # Name
-                    email.strip(),       # Email
-                    agency.strip(),      # Agency
-                    message.strip(),     # Message
-                    "",                  # Urgency (developer field)
-                    "OPEN"               # Status (default)
+                    ticket_no,
+                    date_now,
+                    name.strip(),
+                    email.strip(),
+                    agency.strip(),
+                    message.strip(),
+                    "OPEN",          # Status
+                    ""               # Urgency
                 ]
                 
-                # 1. Save to Google Sheet
                 sheet.append_row(row)
                 
-                # 2. Post to Teams
                 send_feedback_to_teams(
                     ticket_no=ticket_no,
                     date=date_now,
@@ -168,6 +266,10 @@ with st.form("feedback_form", clear_on_submit=True):
                 st.success("Ticket submitted successfully!")
                 st.info(f"**Your Ticket Number:** `{ticket_no}`")
                 st.markdown("SMCOD will reach out to you regarding this ticket.")
+
+                # Force the form to reset by changing the keys
+                st.session_state.form_version += 1
+                st.rerun()
                 
             except Exception as e:
                 st.error(f"Failed to submit ticket. Error: {e}")
